@@ -116,6 +116,7 @@ python 01_transformers_recognition_baseline/run_official_two_step_extract.py \
   --device-map none \
   --device npu:0 \
   --dtype float16 \
+  --attn-implementation eager \
   --image crops/crop_01_text_block_en.png \
   --output outputs/npu_official_two_step_crop_01.json \
   --no-tqdm
@@ -127,6 +128,8 @@ Rationale:
   usually safer with `float16`.
 - `--device-map none --device npu:0` loads normally and then moves the model
   explicitly, avoiding hidden CUDA-oriented placement assumptions.
+- `--attn-implementation eager` avoids immediately betting on SDPA support in
+  the first NPU smoke test.
 - This is still the official high-level `MinerUClient.two_step_extract` path;
   it is only a device-placement adaptation.
 

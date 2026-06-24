@@ -47,6 +47,11 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument("--dtype", default="auto", help="Passed to Transformers as dtype=... for transformers>=4.56.")
     parser.add_argument("--torch-dtype", default=None, help="Fallback/override for older Transformers torch_dtype=...")
+    parser.add_argument(
+        "--attn-implementation",
+        default=None,
+        help='Optional Transformers attention implementation, e.g. "eager" or "sdpa".',
+    )
     parser.add_argument("--use-fast", action=argparse.BooleanOptionalAction, default=True)
     parser.add_argument("--image-analysis", action=argparse.BooleanOptionalAction, default=False)
     parser.add_argument("--no-tqdm", action="store_true")
@@ -76,6 +81,8 @@ def main() -> None:
     }
     if str(args.device_map).lower() not in {"none", "null", ""}:
         model_kwargs["device_map"] = args.device_map
+    if args.attn_implementation is not None:
+        model_kwargs["attn_implementation"] = args.attn_implementation
     version_parts = transformers_version.split(".")
     use_dtype_key = len(version_parts) >= 2 and int(version_parts[0]) >= 4 and int(version_parts[1]) >= 56
     if args.torch_dtype is not None:
@@ -118,6 +125,7 @@ def main() -> None:
         "device_map": str(args.device_map),
         "device": None if args.device is None else str(args.device),
         "dtype_arg": str(args.torch_dtype if args.torch_dtype is not None else args.dtype),
+        "attn_implementation": None if args.attn_implementation is None else str(args.attn_implementation),
         "use_fast": bool(args.use_fast),
         "image_analysis": bool(args.image_analysis),
         "timing_s": {
