@@ -227,6 +227,95 @@ Report `recognition.decode_profile`, `recognition.decode_benchmark`, and whether
 the profile directory contains an `ASCEND_PROFILER_OUTPUT` directory. Do not
 write helper scripts for this run.
 
+### Reading The Profiler Output
+
+The profile run directory is reported at:
+
+```text
+recognition.decode_profile.profile_dir
+```
+
+First inspect whether the profiler produced the expected files and how large
+they are:
+
+```sh
+PROFILE_DIR=<value from recognition.decode_profile.profile_dir>
+
+du -sh "$PROFILE_DIR"
+find "$PROFILE_DIR" -maxdepth 4 -type f -printf '%s %p\n' | sort -nr | head -20
+find "$PROFILE_DIR" -maxdepth 4 -type d -name ASCEND_PROFILER_OUTPUT -print
+```
+
+Important files to look for under the run directory:
+
+```text
+decode_profile_summary.json
+profiler_info.json
+profiler_metadata.json
+ASCEND_PROFILER_OUTPUT/kernel_details.csv
+ASCEND_PROFILER_OUTPUT/operator_details.csv
+ASCEND_PROFILER_OUTPUT/op_statistic.csv
+ASCEND_PROFILER_OUTPUT/api_statistic.csv
+ASCEND_PROFILER_OUTPUT/step_trace_time.csv
+ASCEND_PROFILER_OUTPUT/trace_view.json
+```
+
+`trace_view.json` is often the largest file. If it is huge, parse once with
+`--skip-trace` first so the summary is quick:
+
+```sh
+python 03_compiled_single_batch_decode/parse_npu_profile.py \
+  --profile-dir "$PROFILE_DIR" \
+  --topn 25 \
+  --skip-trace
+```
+
+This writes:
+
+```text
+$PROFILE_DIR/profile_parse_summary.json
+$PROFILE_DIR/profile_parse_summary.md
+```
+
+If `trace_view.json` is reasonably small, rerun without `--skip-trace`:
+
+```sh
+python 03_compiled_single_batch_decode/parse_npu_profile.py \
+  --profile-dir "$PROFILE_DIR" \
+  --topn 25
+```
+
+Report these fields/sections back:
+
+```text
+decode_profile_summary.json
+du -sh "$PROFILE_DIR"
+top 20 largest files from find/sort
+profile_parse_summary.md:
+  Step Trace Totals
+  Kernel Types
+  Kernel Names
+  MatMul Names
+  MatMul Shape And Format Signatures
+  TransData Names
+  TransData Shape And Format Signatures
+  Suspect Kernels
+  Operators
+  APIs
+```
+
+For decode bottleneck analysis, the first pass should focus on:
+
+```text
+MatMulV2 / BatchMatMul / FullyConnection time
+TransData time and ND/FRACTAL_NZ format signatures
+Cast time
+Scatter / scatter_update kernels
+Softmax or attention kernels
+RMSNorm / LayerNorm kernels
+step_trace_time Computing vs Preparing vs Stage totals
+```
+
 ## CUDA/Vast Smoke Command
 
 CUDA uses `torch.compile(fullgraph=True, dynamic=False)` instead of TorchAir:
