@@ -20,6 +20,12 @@ from torch import nn
 from config import MinerUConfig, MinerUTextConfig, MinerUVisionConfig
 
 
+FRACTAL_NZ = 29
+DECODE_WEIGHT_FORMAT_NONE = "none"
+DECODE_WEIGHT_FORMAT_NZ = "decode_nz"
+DECODE_WEIGHT_FORMAT_CHOICES = (DECODE_WEIGHT_FORMAT_NONE, DECODE_WEIGHT_FORMAT_NZ)
+
+
 def _resolve_model_dir(model_dir: str | Path) -> Path:
     path = Path(model_dir).expanduser()
     if not path.exists():
@@ -158,6 +164,103 @@ def update_decode_kv_cache_(
         return
     key_cache.index_copy_(2, positions, key_states.contiguous())
     value_cache.index_copy_(2, positions, value_states.contiguous())
+
+
+def configure_decode_weight_format(
+    model: "LocalMinerU2_5ForConditionalGeneration",
+    mode: str,
+) -> dict[str, object]:
+    """Configure decoder weights for the one-token decode path.
+
+    The checkpoint ties the LM head to ``embed_tokens.weight``. For NZ decode we
+    keep the embedding table in normal layout for token lookup and create a
+    decode-only NZ copy for the final logits projection.
+    """
+
+    if mode not in DECODE_WEIGHT_FORMAT_CHOICES:
+        raise ValueError(f"unsupported decode weight format {mode!r}; expected {DECODE_WEIGHT_FORMAT_CHOICES}")
+
+    model.decode_lm_head_weight = None
+    metadata: dict[str, object] = {
+        "requested_mode": str(mode),
+        "effective_mode": DECODE_WEIGHT_FORMAT_NONE,
+        "target_format": None,
+        "target_format_id": None,
+        "decoder_linear_count": 0,
+        "converted_decoder_linear_count": 0,
+        "already_nz_decoder_linear_count": 0,
+        "lm_head_copy": None,
+        "skipped_reason": None,
+    }
+    if mode == DECODE_WEIGHT_FORMAT_NONE:
+        return metadata
+
+    device = model.device
+    if device.type != "npu":
+        metadata["skipped_reason"] = f"decode_nz requires NPU tensors, got device={device.type}"
+        return metadata
+
+    import torch_npu
+
+    metadata["target_format"] = "FRACTAL_NZ"
+    metadata["target_format_id"] = FRACTAL_NZ
+    converted: list[str] = []
+    already_nz: list[str] = []
+    before_formats: dict[str, int | None] = {}
+    after_formats: dict[str, int | None] = {}
+
+    decoder_linears: list[tuple[str, nn.Linear]] = []
+    for layer_idx, layer in enumerate(model.model.layers):
+        for name, module in layer.named_modules():
+            if isinstance(module, nn.Linear):
+                decoder_linears.append((f"model.layers.{layer_idx}.{name}", module))
+
+    for name, module in decoder_linears:
+        weight = module.weight
+        if weight.device.type != "npu":
+            raise RuntimeError(f"decode_nz requested but {name}.weight is on {weight.device}")
+        before_format = int(torch_npu.get_npu_format(weight))
+        before_formats[name] = before_format
+        if before_format == FRACTAL_NZ:
+            already_nz.append(name)
+        else:
+            module.weight.data = torch_npu.npu_format_cast(module.weight.data, FRACTAL_NZ)
+            converted.append(name)
+        after_formats[name] = int(torch_npu.get_npu_format(module.weight))
+
+    lm_head_source = model.model.embed_tokens.weight
+    if lm_head_source.device.type != "npu":
+        raise RuntimeError(f"decode_nz requested but embed_tokens.weight is on {lm_head_source.device}")
+    lm_head_before = int(torch_npu.get_npu_format(lm_head_source))
+    lm_head_copy = torch_npu.npu_format_cast(lm_head_source.detach(), FRACTAL_NZ)
+    lm_head_copy.requires_grad_(False)
+    model.decode_lm_head_weight = lm_head_copy
+    lm_head_after = int(torch_npu.get_npu_format(model.decode_lm_head_weight))
+
+    metadata.update(
+        {
+            "effective_mode": DECODE_WEIGHT_FORMAT_NZ,
+            "decoder_linear_count": len(decoder_linears),
+            "converted_decoder_linear_count": len(converted),
+            "already_nz_decoder_linear_count": len(already_nz),
+            "converted_decoder_linear_names": converted,
+            "already_nz_decoder_linear_names": already_nz,
+            "before_formats": before_formats,
+            "after_formats": after_formats,
+            "all_decoder_linears_nz": all(value == FRACTAL_NZ for value in after_formats.values()),
+            "lm_head_copy": {
+                "source": "model.embed_tokens.weight",
+                "reason": "tied LM head needs NZ matmul weight, but embedding lookup must keep the original ND table",
+                "source_format_before": lm_head_before,
+                "copy_format_after": lm_head_after,
+                "copy_is_target_format": lm_head_after == FRACTAL_NZ,
+                "shape": [int(dim) for dim in lm_head_copy.shape],
+                "dtype": str(lm_head_copy.dtype),
+                "device": str(lm_head_copy.device),
+            },
+        }
+    )
+    return metadata
 
 
 @dataclass
@@ -756,6 +859,7 @@ class LocalMinerU2_5ForConditionalGeneration(nn.Module):
         self.visual = MinerUVisionTransformer(config.vision_config)
         self.model = MinerUTextModel(config.text_config)
         self.rope_deltas: torch.Tensor | None = None
+        self.decode_lm_head_weight: torch.Tensor | None = None
 
     @property
     def dtype(self) -> torch.dtype:
@@ -1377,4 +1481,7 @@ class MinerUFlatStaticDecodeModule(nn.Module):
             cache_length=self.cache_length,
             attention_mask=None,
         )
-        return F.linear(hidden_states[:, -1:, :], self.model.model.embed_tokens.weight)
+        lm_head_weight = self.model.decode_lm_head_weight
+        if lm_head_weight is None:
+            lm_head_weight = self.model.model.embed_tokens.weight
+        return F.linear(hidden_states[:, -1:, :], lm_head_weight)

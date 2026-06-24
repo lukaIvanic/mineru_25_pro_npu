@@ -45,9 +45,23 @@ KV cache: [1, 2, cache_length, 64] per layer, 24 layers
 cache update: torch_npu.scatter_update_ on NPU, index_copy_ elsewhere
 attention: manual Qwen2 attention ops for now
 compile: fullgraph=True, dynamic=False
-TorchAir cache key: mineru_manual_attention_bs1_cache{cache_length}
+TorchAir cache key: mineru_manual_attention_{decode_weight_format}_bs1_cache{cache_length}
 compiled callable: explicit 24 K tensors + explicit 24 V tensors, no *args
 ```
+
+Decode weight format can be selected with `--decode-weight-format`:
+
+```text
+none      keep decoder weights in the checkpoint/device default layout
+decode_nz preconvert decoder linear weights to FRACTAL_NZ on NPU
+```
+
+`decode_nz` is NPU-only. It casts decoder layer `nn.Linear.weight` tensors to
+FRACTAL_NZ before the compiled decode graph is built. The checkpoint ties the LM
+head to `embed_tokens.weight`, so the embedding table is not mutated; the local
+model instead creates a separate decode-only NZ copy for the final logits
+projection. This targets the repeated decode-profile `TransData` signatures for
+LM-head and MLP weights while keeping token embedding lookup in normal layout.
 
 Decoder parameter count for this local MinerU2.5-Pro config:
 
@@ -98,6 +112,7 @@ python 03_compiled_single_batch_decode/run_local_model_two_step_extract.py \
   --image crops/crop_01_text_block_en.png \
   --max-new-tokens 128 \
   --cache-length 512 \
+  --decode-weight-format none \
   --benchmark-decode \
   --decode-warmup-steps 4 \
   --decode-measure-steps 32 \
@@ -183,6 +198,92 @@ recognition.canonical_reference
 recognition.decode_benchmark
 ```
 
+## Work/NPU Decode NZ Comparison
+
+Use this after the default smoke passes. Do not write extra helper scripts.
+Run the baseline first, then the NZ run. Use separate output files and separate
+TorchAir cache roots so cache provenance is obvious.
+
+Baseline ND/default layout:
+
+```sh
+python 03_compiled_single_batch_decode/run_local_model_two_step_extract.py \
+  --model "$MODEL_DIR" \
+  --device npu:0 \
+  --dtype float16 \
+  --npu-jit-compile off \
+  --npu-conv3d-mode auto \
+  --no-use-fast \
+  --image crops/crop_01_text_block_en.png \
+  --max-new-tokens 128 \
+  --cache-length 512 \
+  --decode-weight-format none \
+  --torchair-cache-dir outputs/exp03_torchair_cache_none \
+  --benchmark-decode \
+  --decode-warmup-steps 4 \
+  --decode-measure-steps 64 \
+  --hash-model-files \
+  --output outputs/exp03_crop_01_npu_decode_none.json
+```
+
+NZ decode weights:
+
+```sh
+python 03_compiled_single_batch_decode/run_local_model_two_step_extract.py \
+  --model "$MODEL_DIR" \
+  --device npu:0 \
+  --dtype float16 \
+  --npu-jit-compile off \
+  --npu-conv3d-mode auto \
+  --no-use-fast \
+  --image crops/crop_01_text_block_en.png \
+  --max-new-tokens 128 \
+  --cache-length 512 \
+  --decode-weight-format decode_nz \
+  --torchair-cache-dir outputs/exp03_torchair_cache_decode_nz \
+  --benchmark-decode \
+  --decode-warmup-steps 4 \
+  --decode-measure-steps 64 \
+  --hash-model-files \
+  --output outputs/exp03_crop_01_npu_decode_nz.json
+```
+
+Both runs must pass:
+
+```text
+recognition.validation.trimmed_token_match=true
+recognition.canonical_reference.strict_match=true
+```
+
+For the NZ run, also check:
+
+```text
+decode_weight_format.requested_mode=decode_nz
+decode_weight_format.effective_mode=decode_nz
+decode_weight_format.all_decoder_linears_nz=true
+decode_weight_format.lm_head_copy.copy_is_target_format=true
+recognition.compiled_decode.compile.decode_weight_format=decode_nz
+recognition.decode_benchmark.compile.decode_weight_format=decode_nz
+```
+
+Then compare:
+
+```text
+recognition.decode_benchmark.decode_tok_s
+recognition.decode_benchmark.decode_s
+recognition.compiled_decode.decode_tok_s
+recognition.compiled_decode.decode_s
+```
+
+The first NZ run may pay a fresh TorchAir compile because the cache key includes
+`decode_nz`. A warm rerun of the same NZ command should show
+`recognition.decode_benchmark.compile_warmup.ran_this_call=false` and should not
+print repeated recompilation warnings.
+
+If NZ correctness fails, report the JSON fields above plus
+`recognition.validation.first_mismatch_index`; do not continue to profiling.
+If NZ correctness passes, profile the NZ path with the command below.
+
 ## Work/NPU Decode Profiler Command
 
 Use this after the smoke passes and there are no recompile warnings. The
@@ -201,6 +302,8 @@ python 03_compiled_single_batch_decode/run_local_model_two_step_extract.py \
   --image crops/crop_01_text_block_en.png \
   --max-new-tokens 128 \
   --cache-length 512 \
+  --decode-weight-format decode_nz \
+  --torchair-cache-dir outputs/exp03_torchair_cache_decode_nz \
   --benchmark-decode \
   --decode-warmup-steps 4 \
   --decode-measure-steps 32 \
@@ -316,6 +419,20 @@ RMSNorm / LayerNorm kernels
 step_trace_time Computing vs Preparing vs Stage totals
 ```
 
+For `decode_nz`, the key question is whether these old weight-side TransData
+signatures disappear or shrink sharply:
+
+```text
+ND -> FRACTAL_NZ "151936,896" LM-head weight
+ND -> FRACTAL_NZ "4864,896" FFN up weight
+ND -> FRACTAL_NZ "896,4864" FFN down weight
+ND -> FRACTAL_NZ "896,896" Q/O projection weight
+ND -> FRACTAL_NZ "128,896" KV projection weight
+```
+
+Report the before/after `Kernel Types`, `TransData Shape And Format
+Signatures`, and `MatMul Shape And Format Signatures` summaries.
+
 ## CUDA/Vast Smoke Command
 
 CUDA uses `torch.compile(fullgraph=True, dynamic=False)` instead of TorchAir:
@@ -329,6 +446,7 @@ python 03_compiled_single_batch_decode/run_local_model_two_step_extract.py \
   --image crops/crop_01_text_block_en.png \
   --max-new-tokens 128 \
   --cache-length 512 \
+  --decode-weight-format none \
   --benchmark-decode \
   --decode-warmup-steps 4 \
   --decode-measure-steps 32 \

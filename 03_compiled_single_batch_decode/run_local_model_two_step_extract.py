@@ -23,7 +23,11 @@ from typing import Any, Callable, Optional
 from PIL import Image
 import torch
 
-from local_modeling_mineru import LocalMinerU2_5ForConditionalGeneration
+from local_modeling_mineru import (
+    DECODE_WEIGHT_FORMAT_CHOICES,
+    LocalMinerU2_5ForConditionalGeneration,
+    configure_decode_weight_format,
+)
 
 
 DEFAULT_IMAGE = Path(__file__).resolve().parents[1] / "crops" / "crop_01_text_block_en.png"
@@ -263,8 +267,17 @@ def import_torchair():
     return torchair, CompilerConfig
 
 
-def torchair_cache_dir_for_shape(cache_root: Path, *, batch_size: int, cache_length: int) -> Path:
-    shape_key = f"mineru_manual_attention_bs{int(batch_size)}_cache{int(cache_length)}"
+def torchair_cache_dir_for_shape(
+    cache_root: Path,
+    *,
+    batch_size: int,
+    cache_length: int,
+    decode_weight_format: str,
+) -> Path:
+    shape_key = (
+        f"mineru_manual_attention_{str(decode_weight_format)}"
+        f"_bs{int(batch_size)}_cache{int(cache_length)}"
+    )
     return cache_root.expanduser().resolve() / shape_key
 
 
@@ -275,6 +288,7 @@ def compile_static_decode(
     cache_root: Path,
     batch_size: int,
     cache_length: int,
+    decode_weight_format: str,
 ) -> tuple[Callable[..., Any], dict[str, Any]]:
     import torch
 
@@ -286,6 +300,7 @@ def compile_static_decode(
             cache_root,
             batch_size=batch_size,
             cache_length=cache_length,
+            decode_weight_format=decode_weight_format,
         )
         shape_cache_dir.mkdir(parents=True, exist_ok=True)
         compiled_decode = torchair.inference.cache_compile(
@@ -306,6 +321,7 @@ def compile_static_decode(
             "batch_size": int(batch_size),
             "cache_length": int(cache_length),
             "decode_attention": "manual_eager_attention_ops",
+            "decode_weight_format": str(decode_weight_format),
         }
 
     compiled_decode = torch.compile(flat_decode, fullgraph=True, dynamic=False)
@@ -317,6 +333,7 @@ def compile_static_decode(
         "batch_size": int(batch_size),
         "cache_length": int(cache_length),
         "decode_attention": "manual_eager_attention_ops",
+        "decode_weight_format": str(decode_weight_format),
     }
 
 
@@ -541,13 +558,15 @@ class CompiledSingleBatchRecognitionDecoder:
         *,
         cache_root: Path,
         cache_length: int | None,
+        decode_weight_format: str,
     ) -> None:
         self.model = model
         self.cache_root = cache_root
         self.cache_length = None if cache_length is None else int(cache_length)
-        self._flat_decode_by_shape: dict[tuple[int, int], Any] = {}
-        self._compiled_by_shape: dict[tuple[int, int], tuple[Callable[..., Any], dict[str, Any]]] = {}
-        self._warmup_by_shape: dict[tuple[int, int], dict[str, Any]] = {}
+        self.decode_weight_format = str(decode_weight_format)
+        self._flat_decode_by_shape: dict[tuple[int, int, str], Any] = {}
+        self._compiled_by_shape: dict[tuple[int, int, str], tuple[Callable[..., Any], dict[str, Any]]] = {}
+        self._warmup_by_shape: dict[tuple[int, int, str], dict[str, Any]] = {}
 
     def resolve_cache_length(self, input_ids: Any, max_new_tokens: int) -> int:
         return int(self.cache_length or (int(input_ids.shape[1]) + int(max_new_tokens)))
@@ -563,7 +582,7 @@ class CompiledSingleBatchRecognitionDecoder:
 
     @torch.inference_mode()
     def compiled_decode_for(self, *, batch_size: int, cache_length: int) -> tuple[Callable[..., Any], dict[str, Any]]:
-        key = (int(batch_size), int(cache_length))
+        key = (int(batch_size), int(cache_length), self.decode_weight_format)
         if key not in self._compiled_by_shape:
             flat_decode = self._flat_decode_by_shape.get(key)
             if flat_decode is None:
@@ -575,6 +594,7 @@ class CompiledSingleBatchRecognitionDecoder:
                 cache_root=self.cache_root,
                 batch_size=int(batch_size),
                 cache_length=int(cache_length),
+                decode_weight_format=self.decode_weight_format,
             )
             self._compiled_by_shape[key] = (compiled_decode, compile_meta)
         return self._compiled_by_shape[key]
@@ -589,7 +609,7 @@ class CompiledSingleBatchRecognitionDecoder:
         *,
         cache_length: int,
     ) -> dict[str, Any]:
-        key = (int(input_ids.shape[0]), int(cache_length))
+        key = (int(input_ids.shape[0]), int(cache_length), self.decode_weight_format)
         if key in self._warmup_by_shape:
             previous = dict(self._warmup_by_shape[key])
             previous["ran_this_call"] = False
@@ -1271,6 +1291,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--max-new-tokens", type=int, default=512)
     parser.add_argument("--cache-length", type=int, default=None, help="Static KV cache length for compiled recognition decode; defaults to input tokens + max new tokens.")
     parser.add_argument("--torchair-cache-dir", type=Path, default=DEFAULT_TORCHAIR_CACHE_DIR)
+    parser.add_argument(
+        "--decode-weight-format",
+        choices=DECODE_WEIGHT_FORMAT_CHOICES,
+        default="none",
+        help=(
+            "Weight layout for the compiled recognition decode path. "
+            "`decode_nz` preconverts decoder linear weights to FRACTAL_NZ on NPU and "
+            "uses a separate NZ copy of the tied LM-head weight for decode logits."
+        ),
+    )
     parser.add_argument("--benchmark-decode", action="store_true", help="Run a separate warmed decode-only tok/s benchmark for each generation call.")
     parser.add_argument("--decode-warmup-steps", type=int, default=8)
     parser.add_argument("--decode-measure-steps", type=int, default=64)
@@ -1311,6 +1341,12 @@ def main() -> None:
         dtype=dtype,
         device=args.device,
     )
+    maybe_sync_device(model.device)
+    decode_weight_format_start = time.perf_counter()
+    decode_weight_format = configure_decode_weight_format(model, str(args.decode_weight_format))
+    maybe_sync_device(model.device)
+    decode_weight_format["setup_s"] = float(time.perf_counter() - decode_weight_format_start)
+    effective_decode_weight_format = str(decode_weight_format.get("effective_mode", "none"))
     processor = AutoProcessor.from_pretrained(
         processor_dir,
         use_fast=bool(args.use_fast),
@@ -1320,6 +1356,7 @@ def main() -> None:
         model,
         cache_root=args.torchair_cache_dir,
         cache_length=args.cache_length,
+        decode_weight_format=effective_decode_weight_format,
     )
     predictor = LocalMinerUModelPredictor(
         model,
@@ -1367,6 +1404,7 @@ def main() -> None:
         "npu_jit_compile": str(args.npu_jit_compile),
         "npu_conv3d_mode": str(args.npu_conv3d_mode),
         "use_fast": bool(args.use_fast),
+        "decode_weight_format": decode_weight_format,
         "recognition_compiled_decode": {
             "enabled": True,
             "batch_size": 1,
@@ -1374,6 +1412,8 @@ def main() -> None:
             "torchair_cache_dir": str(args.torchair_cache_dir),
             "layout_decode": "dynamic_eager",
             "recognition_decode": "static_cache_compiled",
+            "decode_weight_format_requested": str(args.decode_weight_format),
+            "decode_weight_format_effective": effective_decode_weight_format,
         },
         "layout_image_size": [int(args.layout_image_size[0]), int(args.layout_image_size[1])],
         "selected_block_index": int(result["selected_block_index"]),
