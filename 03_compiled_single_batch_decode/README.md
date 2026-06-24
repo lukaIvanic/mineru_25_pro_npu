@@ -46,7 +46,15 @@ cache update: torch_npu.scatter_update_ on NPU, index_copy_ elsewhere
 attention: manual Qwen2 attention ops for now
 compile: fullgraph=True, dynamic=False
 TorchAir cache key: mineru_manual_attention_bs1_cache{cache_length}
+compiled callable: explicit 24 K tensors + explicit 24 V tensors, no *args
 ```
+
+The flat decode module is created per `(batch_size, cache_length)` and stores
+`cache_length` as a Python attribute. The decode loops update `cache_position`
+in-place with `add_(1)`. This is intentionally stricter than the earlier
+varargs path because NPU/TorchAir recompile warnings are much easier to trigger
+when the compiled callable owns Python tuple slicing or shape-derived cache
+length logic.
 
 ## Work/NPU Smoke Command
 
@@ -103,6 +111,33 @@ When an attempt is made to form the product BA, we discover that the dimensions 
   broken.
 - warm cache reruns should have much smaller `compiled_first_call_s` than the
   first cold compile run
+
+If the work/NPU run still prints repeated TorchAir/Dynamo recompilation
+warnings, rerun the same command with guard logging enabled from process start:
+
+```sh
+TORCH_LOGS=recompiles,guards,graph_breaks \
+TORCHDYNAMO_VERBOSE=1 \
+python 03_compiled_single_batch_decode/run_local_model_two_step_extract.py \
+  --model "$MODEL_DIR" \
+  --device npu:0 \
+  --dtype float16 \
+  --npu-jit-compile off \
+  --npu-conv3d-mode auto \
+  --no-use-fast \
+  --image crops/crop_01_text_block_en.png \
+  --max-new-tokens 128 \
+  --cache-length 512 \
+  --benchmark-decode \
+  --decode-warmup-steps 4 \
+  --decode-measure-steps 8 \
+  --hash-model-files \
+  --output outputs/exp03_crop_01_npu_recompile_debug.json
+```
+
+The environment variables must be set before Python starts. Do not add inline
+scripts. Report the exact `Recompiling function...`, `last reason`, guard
+failure, and graph-break lines together with the JSON fields below.
 
 Do not write helper scripts on the work/NPU lane. If the JSON is noisy because
 TorchAir prints before the object, open the output file and read the final JSON

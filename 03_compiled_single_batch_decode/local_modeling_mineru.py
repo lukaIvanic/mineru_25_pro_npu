@@ -1245,28 +1245,128 @@ class LocalMinerU2_5ForConditionalGeneration(nn.Module):
             next_token = torch.where(finished.view(-1, 1), torch.full_like(next_token, pad_token_id), next_token)
             generated.append(next_token)
             finished = finished | (next_token.squeeze(1) == eos_token_id)
-            cache_position = cache_position + 1
+            cache_position.add_(1)
         return torch.cat(generated, dim=1)
 
-    def make_flat_static_decode_module(self) -> "MinerUFlatStaticDecodeModule":
-        return MinerUFlatStaticDecodeModule(self)
+    def make_flat_static_decode_module(self, *, cache_length: int) -> "MinerUFlatStaticDecodeModule":
+        return MinerUFlatStaticDecodeModule(self, cache_length=cache_length)
 
 
 class MinerUFlatStaticDecodeModule(nn.Module):
-    def __init__(self, model: LocalMinerU2_5ForConditionalGeneration):
+    def __init__(self, model: LocalMinerU2_5ForConditionalGeneration, *, cache_length: int):
         super().__init__()
         self.model = model
         self.num_layers = int(model.config.text_config.num_hidden_layers)
+        if self.num_layers != 24:
+            raise ValueError(f"MinerU2.5-Pro static decode expects 24 decoder layers, got {self.num_layers}")
+        self.cache_length = int(cache_length)
 
     def forward(
         self,
         input_ids: torch.Tensor,
         cache_position: torch.Tensor,
         rope_deltas: torch.Tensor,
-        *flat_cache_tensors: torch.Tensor,
+        k0: torch.Tensor,
+        k1: torch.Tensor,
+        k2: torch.Tensor,
+        k3: torch.Tensor,
+        k4: torch.Tensor,
+        k5: torch.Tensor,
+        k6: torch.Tensor,
+        k7: torch.Tensor,
+        k8: torch.Tensor,
+        k9: torch.Tensor,
+        k10: torch.Tensor,
+        k11: torch.Tensor,
+        k12: torch.Tensor,
+        k13: torch.Tensor,
+        k14: torch.Tensor,
+        k15: torch.Tensor,
+        k16: torch.Tensor,
+        k17: torch.Tensor,
+        k18: torch.Tensor,
+        k19: torch.Tensor,
+        k20: torch.Tensor,
+        k21: torch.Tensor,
+        k22: torch.Tensor,
+        k23: torch.Tensor,
+        v0: torch.Tensor,
+        v1: torch.Tensor,
+        v2: torch.Tensor,
+        v3: torch.Tensor,
+        v4: torch.Tensor,
+        v5: torch.Tensor,
+        v6: torch.Tensor,
+        v7: torch.Tensor,
+        v8: torch.Tensor,
+        v9: torch.Tensor,
+        v10: torch.Tensor,
+        v11: torch.Tensor,
+        v12: torch.Tensor,
+        v13: torch.Tensor,
+        v14: torch.Tensor,
+        v15: torch.Tensor,
+        v16: torch.Tensor,
+        v17: torch.Tensor,
+        v18: torch.Tensor,
+        v19: torch.Tensor,
+        v20: torch.Tensor,
+        v21: torch.Tensor,
+        v22: torch.Tensor,
+        v23: torch.Tensor,
     ) -> torch.Tensor:
-        key_caches = flat_cache_tensors[: self.num_layers]
-        value_caches = flat_cache_tensors[self.num_layers :]
+        key_caches = (
+            k0,
+            k1,
+            k2,
+            k3,
+            k4,
+            k5,
+            k6,
+            k7,
+            k8,
+            k9,
+            k10,
+            k11,
+            k12,
+            k13,
+            k14,
+            k15,
+            k16,
+            k17,
+            k18,
+            k19,
+            k20,
+            k21,
+            k22,
+            k23,
+        )
+        value_caches = (
+            v0,
+            v1,
+            v2,
+            v3,
+            v4,
+            v5,
+            v6,
+            v7,
+            v8,
+            v9,
+            v10,
+            v11,
+            v12,
+            v13,
+            v14,
+            v15,
+            v16,
+            v17,
+            v18,
+            v19,
+            v20,
+            v21,
+            v22,
+            v23,
+        )
         inputs_embeds = self.model.model.embed_tokens(input_ids)
         hidden_states = self.model.model.forward_decode_static(
             inputs_embeds=inputs_embeds,
@@ -1274,7 +1374,7 @@ class MinerUFlatStaticDecodeModule(nn.Module):
             rope_deltas=rope_deltas,
             key_caches=key_caches,
             value_caches=value_caches,
-            cache_length=int(key_caches[0].shape[2]),
+            cache_length=self.cache_length,
             attention_mask=None,
         )
         return F.linear(hidden_states[:, -1:, :], self.model.model.embed_tokens.weight)

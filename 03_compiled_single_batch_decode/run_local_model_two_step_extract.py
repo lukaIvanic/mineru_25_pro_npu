@@ -517,7 +517,7 @@ class CompiledSingleBatchRecognitionDecoder:
         self.model = model
         self.cache_root = cache_root
         self.cache_length = None if cache_length is None else int(cache_length)
-        self.flat_decode = model.make_flat_static_decode_module().eval()
+        self._flat_decode_by_shape: dict[tuple[int, int], Any] = {}
         self._compiled_by_shape: dict[tuple[int, int], tuple[Callable[..., Any], dict[str, Any]]] = {}
         self._warmup_by_shape: dict[tuple[int, int], dict[str, Any]] = {}
 
@@ -536,8 +536,12 @@ class CompiledSingleBatchRecognitionDecoder:
     def compiled_decode_for(self, *, batch_size: int, cache_length: int) -> tuple[Callable[..., Any], dict[str, Any]]:
         key = (int(batch_size), int(cache_length))
         if key not in self._compiled_by_shape:
+            flat_decode = self._flat_decode_by_shape.get(key)
+            if flat_decode is None:
+                flat_decode = self.model.make_flat_static_decode_module(cache_length=int(cache_length)).eval()
+                self._flat_decode_by_shape[key] = flat_decode
             compiled_decode, compile_meta = compile_static_decode(
-                self.flat_decode,
+                flat_decode,
                 device=self.model.device,
                 cache_root=self.cache_root,
                 batch_size=int(batch_size),
@@ -666,7 +670,7 @@ class CompiledSingleBatchRecognitionDecoder:
             )
             generated.append(next_token)
             finished = finished | (next_token.squeeze(1) == int(eos_token_id))
-            cache_position = cache_position + 1
+            cache_position.add_(1)
         maybe_sync_device(self.model.device)
         decode_s = time.perf_counter() - decode_start
 
@@ -732,7 +736,7 @@ class CompiledSingleBatchRecognitionDecoder:
         for step in range(warmup_steps):
             logits = compiled_decode(warm_next, warm_cache_position, warm_prefill.rope_deltas, *warm_flat_cache)
             warm_next = torch.argmax(logits[:, -1, :].float(), dim=-1, keepdim=True)
-            warm_cache_position = warm_cache_position + 1
+            warm_cache_position.add_(1)
 
         maybe_sync_device(self.model.device)
         prefill_start = time.perf_counter()
@@ -756,7 +760,7 @@ class CompiledSingleBatchRecognitionDecoder:
         for _step in range(measure_steps):
             logits = compiled_decode(next_token, cache_position, prefill.rope_deltas, *flat_cache)
             next_token = torch.argmax(logits[:, -1, :].float(), dim=-1, keepdim=True)
-            cache_position = cache_position + 1
+            cache_position.add_(1)
         maybe_sync_device(self.model.device)
         decode_s = time.perf_counter() - decode_start
         return {
