@@ -39,7 +39,12 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--image", type=Path, default=DEFAULT_IMAGE)
-    parser.add_argument("--device-map", default="auto")
+    parser.add_argument("--device-map", default="auto", help='Transformers device_map value. Use "none" to omit it.')
+    parser.add_argument(
+        "--device",
+        default=None,
+        help="Optional explicit device after loading, e.g. cuda:0 or npu:0. Use with --device-map none.",
+    )
     parser.add_argument("--dtype", default="auto", help="Passed to Transformers as dtype=... for transformers>=4.56.")
     parser.add_argument("--torch-dtype", default=None, help="Fallback/override for older Transformers torch_dtype=...")
     parser.add_argument("--use-fast", action=argparse.BooleanOptionalAction, default=True)
@@ -60,10 +65,17 @@ def main() -> None:
     from transformers import AutoProcessor, Qwen2VLForConditionalGeneration
     from transformers import __version__ as transformers_version
 
+    if args.device is not None and str(args.device_map).lower() not in {"none", "null", ""}:
+        raise ValueError("Use --device-map none when passing --device; mixing both can create ambiguous placement.")
+
+    if args.device is not None and str(args.device).startswith("npu"):
+        import torch_npu  # noqa: F401  # Required so torch recognizes the npu device type.
+
     model_kwargs: dict[str, Any] = {
-        "device_map": args.device_map,
         "local_files_only": bool(args.local_files_only),
     }
+    if str(args.device_map).lower() not in {"none", "null", ""}:
+        model_kwargs["device_map"] = args.device_map
     version_parts = transformers_version.split(".")
     use_dtype_key = len(version_parts) >= 2 and int(version_parts[0]) >= 4 and int(version_parts[1]) >= 56
     if args.torch_dtype is not None:
@@ -75,6 +87,8 @@ def main() -> None:
 
     setup_start = time.perf_counter()
     model = Qwen2VLForConditionalGeneration.from_pretrained(args.model, **model_kwargs)
+    if args.device is not None:
+        model = model.to(args.device)
     processor = AutoProcessor.from_pretrained(
         args.model,
         use_fast=bool(args.use_fast),
@@ -102,6 +116,7 @@ def main() -> None:
         "image_size": [int(image.width), int(image.height)],
         "transformers_version": str(transformers_version),
         "device_map": str(args.device_map),
+        "device": None if args.device is None else str(args.device),
         "dtype_arg": str(args.torch_dtype if args.torch_dtype is not None else args.dtype),
         "use_fast": bool(args.use_fast),
         "image_analysis": bool(args.image_analysis),
