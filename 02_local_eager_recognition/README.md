@@ -50,6 +50,37 @@ independently:
 The CLI is only a wrapper around this class. Future experiment-2 scripts should
 reuse the class instead of copying protocol logic into `main()`.
 
+## Step 02: Local Model, External Processor
+
+`run_local_model_two_step_extract.py` keeps the reusable two-step client from
+step 01 and replaces the model backend with:
+
+```text
+config.py
+local_modeling_mineru.py
+```
+
+The local model class does not import Transformers. It still expects
+`AutoProcessor` for tokenization and image preprocessing, so this step isolates
+the model implementation without changing preprocessing at the same time.
+
+Implemented local model scope:
+
+```text
+Qwen2-VL Conv3D patch embed
+32-layer vision tower, manual eager attention
+2x2 patch merger
+24-layer Qwen2 decoder, manual eager attention
+dynamic KV cache
+tied embedding LM head
+greedy generate loop
+```
+
+The model loader requires a local checkpoint directory. It does not download
+from Hugging Face. The MinerU2.5-Pro checkpoint currently has direct checkpoint
+keys like `visual.*` and `model.layers.*`, so the local module names are chosen
+to load those safetensor keys directly.
+
 ## CUDA Smoke Command
 
 ```sh
@@ -68,6 +99,30 @@ python 02_local_eager_recognition/run_manual_two_step_extract.py \
 
 Expected: one parsed text block and a recognition string matching the official
 experiment-01 output for `crop_01_text_block_en.png`.
+
+## CUDA Local-Model Smoke Command
+
+Set `MODEL_DIR` to the local snapshot directory. On the current Vast CUDA box,
+it is expected to look like:
+
+```sh
+export MODEL_DIR=/workspace/hf_cache/hub/models--opendatalab--MinerU2.5-Pro-2605-1.2B/snapshots/bff20d4ae2bf202df9f45284b4d43681555a97ed
+```
+
+Then run:
+
+```sh
+python 02_local_eager_recognition/run_local_model_two_step_extract.py \
+  --model "$MODEL_DIR" \
+  --device cuda:0 \
+  --dtype float16 \
+  --no-use-fast \
+  --image crops/crop_01_text_block_en.png \
+  --output outputs/local_model_crop_01_cuda.json
+```
+
+Expected: the same selected layout block and recognition text as the manual
+protocol/HF-model smoke command.
 
 ## First Work/NPU Command
 
@@ -89,6 +144,27 @@ python 02_local_eager_recognition/run_manual_two_step_extract.py \
   --output outputs/manual_protocol_crop_01_npu.json
 ```
 
+## First Work/NPU Local-Model Command
+
+Set `MODEL_DIR` to the local MinerU2.5-Pro snapshot directory on the NPU box,
+then run:
+
+```sh
+python 02_local_eager_recognition/run_local_model_two_step_extract.py \
+  --model "$MODEL_DIR" \
+  --device npu:0 \
+  --dtype float16 \
+  --npu-jit-compile off \
+  --npu-conv3d-mode auto \
+  --no-use-fast \
+  --image crops/crop_01_text_block_en.png \
+  --output outputs/local_model_crop_01_npu.json
+```
+
+Expected: stdout shows `jit_compile=False` and the Conv3D patch line, then the
+JSON result. Compare `recognition.text` with the official/HF-model experiment
+02 output for the same crop.
+
 For the first NPU report, include:
 
 - exact command
@@ -104,8 +180,8 @@ Do not edit tracked files or write helper scripts on the NPU lane.
 
 ## Next Replacement Steps
 
-1. Replace `model.generate` with a manual greedy loop while still using the HF
-   model.
-2. Add local config and weight loading.
-3. Implement local Qwen2-VL modules and compare logits layer by layer.
-4. Replace processor/image preprocessing last, after model parity is stable.
+1. Validate the local model on CUDA and NPU against the official/HF-model
+   protocol output.
+2. Add optional logits/layer probes if generation text diverges.
+3. Start experiment 03 by making decode cache/layout compile-friendly.
+4. Replace processor/image preprocessing only after model parity is stable.
