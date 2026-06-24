@@ -93,12 +93,17 @@ Validated command:
 python 01_transformers_recognition_baseline/run_official_two_step_extract.py \
   --image crops/crop_01_text_block_en.png \
   --output outputs/official_two_step_crop_01.json \
+  --no-use-fast \
   --no-tqdm
 ```
 
 Observed output for `crop_01_text_block_en.png`: one detected `text` block with
 reasonable English OCR content. First setup/load was about 30.5 s, and
 `two_step_extract` was about 3.5 s on the RTX 3090.
+
+`--use-fast` is off by default. Keep it off for NPU smoke tests because the
+fast processor path has triggered torchvision-related problems in this project
+family before. Turn it on only when explicitly testing that path.
 
 ## First Work/NPU Attempt
 
@@ -117,6 +122,9 @@ python 01_transformers_recognition_baseline/run_official_two_step_extract.py \
   --device npu:0 \
   --dtype float16 \
   --attn-implementation eager \
+  --npu-jit-compile off \
+  --npu-conv3d-mode auto \
+  --no-use-fast \
   --image crops/crop_01_text_block_en.png \
   --output outputs/npu_official_two_step_crop_01.json \
   --no-tqdm
@@ -130,6 +138,13 @@ Rationale:
   explicitly, avoiding hidden CUDA-oriented placement assumptions.
 - `--attn-implementation eager` avoids immediately betting on SDPA support in
   the first NPU smoke test.
+- `--npu-jit-compile off` calls `torch.npu.set_compile_mode(jit_compile=False)`
+  before loading/running the model. This avoids long eager-mode torch-npu JIT
+  compiles.
+- `--npu-conv3d-mode auto` patches `torch.nn.functional.conv3d` to call
+  `torch_npu.npu_conv3d` for NPU tensors, matching the GLM-OCR/PaddleOCR-VL
+  runtime workaround pattern.
+- `--no-use-fast` keeps the processor on the conservative non-fast path.
 - This is still the official high-level `MinerUClient.two_step_extract` path;
   it is only a device-placement adaptation.
 
