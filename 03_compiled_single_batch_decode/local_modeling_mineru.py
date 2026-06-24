@@ -1227,7 +1227,7 @@ class LocalMinerU2_5ForConditionalGeneration(nn.Module):
         )
         cache = outputs.cache
         rope_deltas = outputs.rope_deltas
-        cache_position = outputs.next_cache_position
+        cache_position = outputs.next_cache_position.clone()
         next_token = torch.argmax(outputs.logits[:, -1, :].float(), dim=-1, keepdim=True)
         generated = [next_token]
         finished = next_token.squeeze(1) == eos_token_id

@@ -589,10 +589,11 @@ class CompiledSingleBatchRecognitionDecoder:
         prefill_s = time.perf_counter() - prefill_start
 
         warm_next = torch.argmax(warm_prefill.logits[:, -1, :].float(), dim=-1, keepdim=True)
+        warm_cache_position = warm_prefill.next_cache_position.clone()
         flat_cache = warm_prefill.cache.flat_tensors()
         maybe_sync_device(self.model.device)
         first_call_start = time.perf_counter()
-        _ = compiled_decode(warm_next, warm_prefill.next_cache_position, warm_prefill.rope_deltas, *flat_cache)
+        _ = compiled_decode(warm_next, warm_cache_position, warm_prefill.rope_deltas, *flat_cache)
         maybe_sync_device(self.model.device)
         first_call_s = time.perf_counter() - first_call_start
 
@@ -651,7 +652,8 @@ class CompiledSingleBatchRecognitionDecoder:
         next_token = torch.argmax(prefill.logits[:, -1, :].float(), dim=-1, keepdim=True)
         generated = [next_token]
         finished = next_token.squeeze(1) == int(eos_token_id)
-        cache_position = prefill.next_cache_position
+        cache_position = prefill.next_cache_position.clone()
+        cache_position_start = int(cache_position[0].detach().cpu().item())
         flat_cache = prefill.cache.flat_tensors()
         decode_calls = 0
 
@@ -679,7 +681,7 @@ class CompiledSingleBatchRecognitionDecoder:
             "enabled": True,
             "scope": "recognition_decode_only",
             "cache_length": int(cache_length),
-            "cache_position_start": int(prefill.next_cache_position[0].detach().cpu().item()),
+            "cache_position_start": int(cache_position_start),
             "compile_warmup": compile_warmup_meta,
             "compile_wrapper_s": float(compile_warmup_meta.get("compile_wrapper_s", 0.0)),
             "compiled_first_call_s": float(compile_warmup_meta.get("first_call_s", 0.0)),
@@ -731,7 +733,7 @@ class CompiledSingleBatchRecognitionDecoder:
             logits_to_keep=1,
         )
         warm_next = torch.argmax(warm_prefill.logits[:, -1, :].float(), dim=-1, keepdim=True)
-        warm_cache_position = warm_prefill.next_cache_position
+        warm_cache_position = warm_prefill.next_cache_position.clone()
         warm_flat_cache = warm_prefill.cache.flat_tensors()
         for step in range(warmup_steps):
             logits = compiled_decode(warm_next, warm_cache_position, warm_prefill.rope_deltas, *warm_flat_cache)
@@ -752,7 +754,7 @@ class CompiledSingleBatchRecognitionDecoder:
         prefill_s = time.perf_counter() - prefill_start
 
         next_token = torch.argmax(prefill.logits[:, -1, :].float(), dim=-1, keepdim=True)
-        cache_position = prefill.next_cache_position
+        cache_position = prefill.next_cache_position.clone()
         flat_cache = prefill.cache.flat_tensors()
 
         maybe_sync_device(self.model.device)
