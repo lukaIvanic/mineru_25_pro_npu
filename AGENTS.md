@@ -64,7 +64,7 @@ This gives an accuracy/protocol anchor without waiting for full-page recognition
 ## Local Artifacts
 
 - `crops/`: fresh copy of the PaddleOCR-VL project's OmniDocBench region crops and manifests. These are crops, not full pages.
-- `01_transformers_recognition_baseline/`: planned minimal Transformers baseline.
+- `01_transformers_recognition_baseline/run_official_two_step_extract.py`: highest-level official `MinerUClient(backend="transformers").two_step_extract(image)` tutorial runner, using the 2605 checkpoint by default.
 - `02_local_eager_recognition/`: planned local eager model implementation.
 - `03_compiled_single_batch_decode/`: planned static-cache compiled decode experiment.
 

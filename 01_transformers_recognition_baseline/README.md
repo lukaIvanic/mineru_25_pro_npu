@@ -8,6 +8,43 @@ Default model:
 opendatalab/MinerU2.5-Pro-2605-1.2B
 ```
 
+## First Script: Official High-Level Tutorial
+
+`run_official_two_step_extract.py` mirrors the highest-level `mineru-vl-utils`
+Transformers tutorial:
+
+```text
+Qwen2VLForConditionalGeneration.from_pretrained(...)
+AutoProcessor.from_pretrained(...)
+MinerUClient(backend="transformers", model=model, processor=processor)
+client.two_step_extract(image)
+```
+
+Install the official tutorial dependencies:
+
+```sh
+pip install -U "mineru-vl-utils[transformers]"
+```
+
+Run on the default copied crop:
+
+```sh
+python3 01_transformers_recognition_baseline/run_official_two_step_extract.py \
+  --output outputs/official_two_step_crop_01.json
+```
+
+Run on another image:
+
+```sh
+python3 01_transformers_recognition_baseline/run_official_two_step_extract.py \
+  --image crops/crop_05_table_rwkv_dims.png \
+  --output outputs/official_two_step_table.json
+```
+
+This is deliberately the fully official high-level path. It is expected to be
+slow with the Transformers backend, but it gives us a reference output before
+we split layout detection and recognition.
+
 ## What We Need To Reproduce
 
 The official `mineru-vl-utils` flow is:
