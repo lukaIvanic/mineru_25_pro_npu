@@ -51,6 +51,16 @@ The official `mineru-vl-utils` package provides `MinerUClient`, including `two_s
 
 For experiments 01-03, do not hide the core model behind `MinerUClient` until the direct Transformers model path is understood. If a client probe is added, keep it separate from the pure model baseline so model architecture and wrapper/postprocessing behavior do not get mixed together.
 
+Experiment 01 should reproduce the official two-step behavior in a simplified, inspectable form:
+
+1. Run the official `MinerUClient.layout_detect(page_image)` on one page/image.
+2. Select exactly one returned `ContentBlock`.
+3. Run content recognition only for that selected block/crop, using the same prompt and sampling parameters that `MinerUClient.prepare_for_extract(...)` would choose.
+4. Also run `MinerUClient.two_step_extract(page_image)` as the official reference.
+5. Compare the selected block's type, bbox, crop, prompt, raw generated content, and postprocessed content against the corresponding block from `two_step_extract`.
+
+This gives an accuracy/protocol anchor without waiting for full-page recognition. It also keeps layout detection, crop preparation, recognition, and postprocessing as separate surfaces for later local/compiled implementation work.
+
 ## Local Artifacts
 
 - `crops/`: fresh copy of the PaddleOCR-VL project's OmniDocBench region crops and manifests. These are crops, not full pages.
