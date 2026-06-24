@@ -29,6 +29,27 @@ RGB input image
 This is intentionally not the final local model. It is the first replacement
 boundary: official HF model and processor, local MinerU-style protocol.
 
+Reusable classes in the script:
+
+```python
+from run_manual_two_step_extract import LocalMinerUTwoStepClient, LocalTransformersPredictor
+
+predictor = LocalTransformersPredictor(model, processor)
+client = LocalMinerUTwoStepClient(predictor)
+result = client.two_step_extract(image, block_index=0)
+```
+
+`LocalMinerUTwoStepClient` exposes the protocol surfaces we will replace/test
+independently:
+
+- `layout_detect(image)`
+- `prepare_selected_block(image, blocks, block_index=...)`
+- `recognize_crop(crop, prompt, block)`
+- `two_step_extract(image, block_index=...)`
+
+The CLI is only a wrapper around this class. Future experiment-2 scripts should
+reuse the class instead of copying protocol logic into `main()`.
+
 ## CUDA Smoke Command
 
 ```sh

@@ -361,6 +361,104 @@ class LocalTransformersPredictor:
         }
 
 
+class LocalMinerUTwoStepClient:
+    """Minimal local replacement for the MinerU two-step client protocol.
+
+    This class owns the page/crop protocol. It does not own the model internals;
+    those live behind LocalTransformersPredictor for this step of experiment 02.
+    """
+
+    def __init__(
+        self,
+        predictor: LocalTransformersPredictor,
+        *,
+        layout_image_size: tuple[int, int] = (1036, 1036),
+    ) -> None:
+        self.predictor = predictor
+        self.layout_image_size = layout_image_size
+
+    def layout_detect(self, image: Image.Image) -> dict[str, Any]:
+        prompt = DEFAULT_PROMPTS["[layout]"]
+        layout_image = prepare_for_layout(image, self.layout_image_size)
+        prediction = self.predictor.predict(layout_image, prompt)
+        parsed_blocks = parse_layout_output(prediction["text"])
+        return {
+            "prompt": prompt,
+            "raw_text": prediction["text"],
+            "parsed_blocks": parsed_blocks,
+            "input_shapes": prediction["input_shapes"],
+            "input_token_count": prediction["input_token_count"],
+            "generated_token_count": prediction["generated_token_count"],
+            "filtered_token_count": prediction["filtered_token_count"],
+            "generated_token_ids": prediction["generated_token_ids"],
+            "filtered_token_ids": prediction["filtered_token_ids"],
+            "generate_s": prediction["generate_s"],
+        }
+
+    def prepare_selected_block(
+        self,
+        image: Image.Image,
+        blocks: list[dict[str, Any]],
+        *,
+        block_index: int,
+    ) -> dict[str, Any]:
+        if not blocks:
+            raise RuntimeError("No layout blocks parsed from model output.")
+        if block_index < 0 or block_index >= len(blocks):
+            raise IndexError(f"--block-index {block_index} out of range for {len(blocks)} blocks")
+
+        selected_block = blocks[block_index]
+        selected_crop = crop_block(image, selected_block)
+        return {
+            "block_index": block_index,
+            "block": selected_block,
+            "crop": selected_crop,
+            "crop_size": [int(selected_crop.width), int(selected_crop.height)],
+            "prompt": select_prompt(str(selected_block["type"])),
+        }
+
+    def recognize_crop(self, crop: Image.Image, prompt: str, block: dict[str, Any]) -> dict[str, Any]:
+        prediction = self.predictor.predict(crop, prompt)
+        return {
+            "selected_block": block,
+            "prompt": prompt,
+            "chat_prompt": prediction["chat_prompt"],
+            "input_shapes": prediction["input_shapes"],
+            "input_token_count": prediction["input_token_count"],
+            "generated_token_count": prediction["generated_token_count"],
+            "filtered_token_count": prediction["filtered_token_count"],
+            "generated_token_ids": prediction["generated_token_ids"],
+            "filtered_token_ids": prediction["filtered_token_ids"],
+            "text": prediction["text"],
+            "generate_s": prediction["generate_s"],
+        }
+
+    def two_step_extract(self, image: Image.Image, *, block_index: int = 0) -> dict[str, Any]:
+        rgb_image = get_rgb_image(image)
+        layout = self.layout_detect(rgb_image)
+        if not layout["parsed_blocks"]:
+            raise RuntimeError(f"No layout blocks parsed from output: {layout['raw_text']!r}")
+
+        selected = self.prepare_selected_block(
+            rgb_image,
+            layout["parsed_blocks"],
+            block_index=block_index,
+        )
+        recognition = self.recognize_crop(
+            selected["crop"],
+            selected["prompt"],
+            selected["block"],
+        )
+        return {
+            "image": rgb_image,
+            "layout": layout,
+            "selected_block_index": selected["block_index"],
+            "selected_crop": selected["crop"],
+            "selected_crop_size": selected["crop_size"],
+            "recognition": recognition,
+        }
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--model", default=DEFAULT_MODEL)
@@ -437,21 +535,16 @@ def main() -> None:
         local_files_only=bool(args.local_files_only),
     )
     predictor = LocalTransformersPredictor(model, processor, max_new_tokens=args.max_new_tokens)
+    client = LocalMinerUTwoStepClient(
+        predictor,
+        layout_image_size=(int(args.layout_image_size[0]), int(args.layout_image_size[1])),
+    )
     setup_s = time.perf_counter() - setup_start
 
     image = Image.open(image_path)
-    rgb_image = get_rgb_image(image)
-
-    layout_image = prepare_for_layout(rgb_image, tuple(args.layout_image_size))
-    layout = predictor.predict(layout_image, DEFAULT_PROMPTS["[layout]"])
-    parsed_blocks = parse_layout_output(layout["text"])
-    if not parsed_blocks:
-        raise RuntimeError(f"No layout blocks parsed from output: {layout['text']!r}")
-    if args.block_index < 0 or args.block_index >= len(parsed_blocks):
-        raise IndexError(f"--block-index {args.block_index} out of range for {len(parsed_blocks)} blocks")
-
-    selected_block = parsed_blocks[args.block_index]
-    selected_crop = crop_block(rgb_image, selected_block)
+    result = client.two_step_extract(image, block_index=args.block_index)
+    rgb_image = result["image"]
+    selected_crop = result["selected_crop"]
     if args.save_selected_crop is not None:
         crop_path = args.save_selected_crop.expanduser().resolve()
         crop_path.parent.mkdir(parents=True, exist_ok=True)
@@ -459,8 +552,8 @@ def main() -> None:
     else:
         crop_path = None
 
-    recognition_prompt = select_prompt(str(selected_block["type"]))
-    recognition = predictor.predict(selected_crop, recognition_prompt)
+    layout = result["layout"]
+    recognition = result["recognition"]
 
     payload = {
         "experiment": "02_manual_mineru_protocol_official_hf_model",
@@ -477,9 +570,9 @@ def main() -> None:
         "npu_conv3d_mode": str(args.npu_conv3d_mode),
         "use_fast": bool(args.use_fast),
         "layout_image_size": [int(args.layout_image_size[0]), int(args.layout_image_size[1])],
-        "selected_block_index": int(args.block_index),
+        "selected_block_index": int(result["selected_block_index"]),
         "selected_crop_path": None if crop_path is None else str(crop_path),
-        "selected_crop_size": [int(selected_crop.width), int(selected_crop.height)],
+        "selected_crop_size": result["selected_crop_size"],
         "timing_s": {
             "setup_model_processor_s": float(setup_s),
             "layout_generate_s": float(layout["generate_s"]),
@@ -497,8 +590,8 @@ def main() -> None:
             "filtered_token_ids": layout["filtered_token_ids"],
         },
         "recognition": {
-            "selected_block": selected_block,
-            "prompt": recognition_prompt,
+            "selected_block": recognition["selected_block"],
+            "prompt": recognition["prompt"],
             "chat_prompt": recognition["chat_prompt"],
             "input_shapes": recognition["input_shapes"],
             "input_token_count": recognition["input_token_count"],
