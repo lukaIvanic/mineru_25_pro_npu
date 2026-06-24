@@ -4,9 +4,13 @@
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
+
+
+def default_rope_scaling() -> dict[str, Any]:
+    return {"mrope_section": [8, 12, 12], "rope_type": "default", "type": "default"}
 
 
 @dataclass(frozen=True)
@@ -53,7 +57,7 @@ class MinerUTextConfig:
     max_position_embeddings: int = 8192
     rms_norm_eps: float = 1e-6
     rope_theta: float = 1000000.0
-    rope_scaling: dict[str, Any] | None = None
+    rope_scaling: dict[str, Any] = field(default_factory=default_rope_scaling)
     attention_dropout: float = 0.0
     tie_word_embeddings: bool = True
     bos_token_id: int = 151643
@@ -67,7 +71,7 @@ class MinerUTextConfig:
     @classmethod
     def from_dict(cls, raw: dict[str, Any] | None) -> "MinerUTextConfig":
         raw = dict(raw or {})
-        rope_scaling = dict(raw.get("rope_scaling") or {})
+        rope_scaling = dict(raw.get("rope_scaling") or default_rope_scaling())
         rope_scaling.setdefault("rope_type", rope_scaling.get("type", "default"))
         rope_scaling.setdefault("type", rope_scaling.get("rope_type", "default"))
         rope_scaling.setdefault("mrope_section", [8, 12, 12])
@@ -144,7 +148,14 @@ class MinerUConfig:
     @classmethod
     def from_dict(cls, raw: dict[str, Any]) -> "MinerUConfig":
         raw = dict(raw)
-        text_config = MinerUTextConfig.from_dict(raw.get("text_config"))
+        text_raw = dict(raw.get("text_config") or {})
+        for key in ("rope_scaling", "rope_theta", "tie_word_embeddings"):
+            if key in raw and key not in text_raw:
+                text_raw[key] = raw[key]
+        for key in ("bos_token_id", "eos_token_id", "pad_token_id"):
+            if key in raw and key not in text_raw:
+                text_raw[key] = raw[key]
+        text_config = MinerUTextConfig.from_dict(text_raw)
         vision_config = MinerUVisionConfig.from_dict(raw.get("vision_config"))
         return cls(
             text_config=text_config,
