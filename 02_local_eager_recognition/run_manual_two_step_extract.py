@@ -579,9 +579,9 @@ def main() -> None:
             "recognition_generate_s": float(recognition["generate_s"]),
         },
         "layout": {
-            "prompt": DEFAULT_PROMPTS["[layout]"],
-            "raw_text": layout["text"],
-            "parsed_blocks": parsed_blocks,
+            "prompt": layout["prompt"],
+            "raw_text": layout["raw_text"],
+            "parsed_blocks": layout["parsed_blocks"],
             "input_shapes": layout["input_shapes"],
             "input_token_count": layout["input_token_count"],
             "generated_token_count": layout["generated_token_count"],
