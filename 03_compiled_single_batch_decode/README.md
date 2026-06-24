@@ -56,6 +56,12 @@ varargs path because NPU/TorchAir recompile warnings are much easier to trigger
 when the compiled callable owns Python tuple slicing or shape-derived cache
 length logic.
 
+The runner and compiled recognition decoder methods run under
+`torch.inference_mode()`, matching the Paddle exp03 benchmark style. This is
+required on NPU so in-place `torch_npu.scatter_update_` cache writes do not make
+later decode calls arrive with different autograd dispatch keys than the first
+compiled call.
+
 ## Work/NPU Smoke Command
 
 Set `MODEL_DIR` to the local MinerU2.5-Pro snapshot directory on the NPU box.
@@ -138,6 +144,14 @@ python 03_compiled_single_batch_decode/run_local_model_two_step_extract.py \
 The environment variables must be set before Python starts. Do not add inline
 scripts. Report the exact `Recompiling function...`, `last reason`, guard
 failure, and graph-break lines together with the JSON fields below.
+
+The specific guard that should be gone after this inference-mode fix is:
+
+```text
+tensor 'L['k0']' dispatch key set mismatch
+expected: DispatchKeySet(PrivateUse1, BackendSelect)
+actual:   DispatchKeySet(PrivateUse1, BackendSelect, ADInplaceOrView, AutogradPrivateUse1)
+```
 
 Do not write helper scripts on the work/NPU lane. If the JSON is noisy because
 TorchAir prints before the object, open the output file and read the final JSON

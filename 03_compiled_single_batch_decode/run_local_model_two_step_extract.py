@@ -19,6 +19,7 @@ from pathlib import Path
 from typing import Any, Callable, Optional
 
 from PIL import Image
+import torch
 
 from local_modeling_mineru import LocalMinerU2_5ForConditionalGeneration
 
@@ -533,6 +534,7 @@ class CompiledSingleBatchRecognitionDecoder:
                 f"and decode_steps={int(decode_steps)}; need at least {required}"
             )
 
+    @torch.inference_mode()
     def compiled_decode_for(self, *, batch_size: int, cache_length: int) -> tuple[Callable[..., Any], dict[str, Any]]:
         key = (int(batch_size), int(cache_length))
         if key not in self._compiled_by_shape:
@@ -550,6 +552,7 @@ class CompiledSingleBatchRecognitionDecoder:
             self._compiled_by_shape[key] = (compiled_decode, compile_meta)
         return self._compiled_by_shape[key]
 
+    @torch.inference_mode()
     def ensure_compiled_decode_warm(
         self,
         input_ids: Any,
@@ -559,8 +562,6 @@ class CompiledSingleBatchRecognitionDecoder:
         *,
         cache_length: int,
     ) -> dict[str, Any]:
-        import torch
-
         key = (int(input_ids.shape[0]), int(cache_length))
         if key in self._warmup_by_shape:
             previous = dict(self._warmup_by_shape[key])
@@ -610,6 +611,7 @@ class CompiledSingleBatchRecognitionDecoder:
         self._warmup_by_shape[key] = dict(warmup_meta)
         return warmup_meta
 
+    @torch.inference_mode()
     def generate(
         self,
         input_ids: Any,
@@ -621,8 +623,6 @@ class CompiledSingleBatchRecognitionDecoder:
         eos_token_id: int,
         pad_token_id: int,
     ) -> tuple[Any, dict[str, Any]]:
-        import torch
-
         if int(input_ids.shape[0]) != 1:
             raise ValueError(f"compiled single-batch decode expects batch size 1, got {int(input_ids.shape[0])}")
         cache_length = self.resolve_cache_length(input_ids, max_new_tokens)
@@ -694,6 +694,7 @@ class CompiledSingleBatchRecognitionDecoder:
             "compile": dict(compile_meta),
         }
 
+    @torch.inference_mode()
     def benchmark_decode(
         self,
         input_ids: Any,
@@ -706,8 +707,6 @@ class CompiledSingleBatchRecognitionDecoder:
         eos_token_id: int,
         pad_token_id: int,
     ) -> dict[str, Any]:
-        import torch
-
         del eos_token_id, pad_token_id
         if int(input_ids.shape[0]) != 1:
             raise ValueError(f"compiled single-batch decode expects batch size 1, got {int(input_ids.shape[0])}")
@@ -829,8 +828,6 @@ class LocalMinerUModelPredictor:
         return shapes
 
     def predict(self, image: Image.Image, prompt: str, *, use_compiled_recognition_decode: bool = False) -> dict[str, Any]:
-        import torch
-
         messages = self.build_messages(prompt, has_image=image is not None)
         chat_prompt = self.processor.apply_chat_template(
             messages,
@@ -1104,6 +1101,7 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+@torch.inference_mode()
 def main() -> None:
     args = parse_args()
     model_dir = Path(args.model).expanduser().resolve()
