@@ -1,0 +1,37 @@
+AGENTS_NPU.md
+.DS_Store
+.venv/
+__pycache__/
+*.py[cod]
+
+# Local caches and generated outputs.
+.cache/
+.hf_home/
+hf_cache/
+models/
+outputs/
+artifacts/
+logs/
+kernel_meta/
+ge_check_op.json
+fusion_result.json
+
+# Bulky generated/model artifacts.
+*.onnx
+*.om
+*.air
+*.mindir
+*.pb
+*.engine
+*.pt
+*.pth
+*.ckpt
+*.safetensors
+*.bin
+*.npy
+*.npz
+*.zip
+*.tar
+*.tar.gz
+*.tgz
+*.7z

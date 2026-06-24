@@ -1,0 +1,3164 @@
+[
+  {
+    "id": "hotswap_001_code_txt_p0001_box_id_3",
+    "file": "hotswap_001_code_txt_p0001_box_id_3.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/page-bd6eb36e-0856-4d9d-b587-21b4a0209c8b.png",
+    "page_index": 1,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "academic_literature",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [],
+      "subset": "equation_hard"
+    },
+    "category_type": "code_txt",
+    "anno_id": "box_id_3",
+    "order": 5,
+    "bbox_xyxy_with_padding": [
+      561,
+      892,
+      991,
+      1218
+    ],
+    "crop_size": [
+      430,
+      326
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "‘’for r = 3 : N\n\nm_r2 = $a_{r2}^{(2)} / a_{22}^{(2)}$;\n\n$a_{r2}^{(3)} $= 0;\n\nfor c = 3 : N + 1\n\n$a_{rc}^{(3)} = a_{rc}^{(2)}      $$ m_r2 * a_{2c}^{(2)}$,\n\nend\n\nend‘’"
+  },
+  {
+    "id": "hotswap_002_code_txt_p1474_11",
+    "file": "hotswap_002_code_txt_p1474_11.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/book_en_搬书匠-3473-Reactive Programming with RxJS-2015-英文版_page_021.png",
+    "page_index": 1474,
+    "page_no": 21,
+    "page_attribute": {
+      "data_source": "book",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "code_txt",
+    "anno_id": 11,
+    "order": 2,
+    "bbox_xyxy_with_padding": [
+      231,
+      188,
+      1166,
+      822
+    ],
+    "crop_size": [
+      935,
+      634
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "\"var button = document.getElementById('retrieveDataBtn');\\nvar source1 = Rx.DOM.getJSON('/resource1').pluck('name');\\nvar source2 = Rx.DOM.getJSON('/resource2').pluck('props', 'name');\\n\\nfunction getResults(amount) {\\n\\treturn source1.merge(source2)\\n\\t\\t.pluck('names')\\n\\t\\t.flatMap(function(array) { return Rx.Observable.from(array); })\\n\\t\\t.distinct()\\n\\t\\t.take(amount);\\n}\\n\\nvar clicks = Rx.Observable.fromEvent(button, 'click');\\n\\nclicks.debounce(1000)\\n\\t.flatMap(getResults(5))\\n\\t.subscribe(\\n\\t\\tfunction(value) { console.log('Received value', value); },\\n\\t\\tfunction(err) { console.error(err); },\\n\\t\\tfunction() { console.log('All values retrieved!'); }\\n\\t);\""
+  },
+  {
+    "id": "hotswap_003_equation_isolated_p0000_box_id_1",
+    "file": "hotswap_003_equation_isolated_p0000_box_id_1.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/page-d1561665-5359-42fe-920c-d6e3bff81953.png",
+    "page_index": 0,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "book",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [],
+      "subset": "equation_hard"
+    },
+    "category_type": "equation_isolated",
+    "anno_id": "box_id_1",
+    "order": 3,
+    "bbox_xyxy_with_padding": [
+      392,
+      350,
+      829,
+      461
+    ],
+    "crop_size": [
+      437,
+      111
+    ],
+    "suggested_prompt": "Formula Recognition:",
+    "ground_truth_source": "latex",
+    "ground_truth": "$$AB = \n\\left[\\begin{array}{ccc}\n2 & 3 \\\\\n1 & 4\n\\end{array}\\right]\n\\left[\\begin{array}{ccc}\n5 & 2 & 1 \\\\\n3 & 8 & 6\n\\end{array}\\right]$$"
+  },
+  {
+    "id": "hotswap_004_equation_isolated_p0036_box_id_9",
+    "file": "hotswap_004_equation_isolated_p0036_box_id_9.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/page-085e8c3e-54f9-4f46-b59b-163ee783dbfd.png",
+    "page_index": 36,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "book",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [],
+      "subset": "equation_hard"
+    },
+    "category_type": "equation_isolated",
+    "anno_id": "box_id_9",
+    "order": 10,
+    "bbox_xyxy_with_padding": [
+      502,
+      1089,
+      1196,
+      1195
+    ],
+    "crop_size": [
+      694,
+      106
+    ],
+    "suggested_prompt": "Formula Recognition:",
+    "ground_truth_source": "latex",
+    "ground_truth": "$${f}_{\\alpha }\\left( z\\right)  = \\frac{1}{\\Gamma \\left( {\\alpha }_{2}\\right) {\\alpha }_{1}^{{\\alpha }_{2}}}{z}^{{\\alpha }_{2} - 1}\\exp \\left\\{  {-z/{\\alpha }_{1}}\\right\\}  ,\\;\\left( {z \\geq  0}\\right) ,$$"
+  },
+  {
+    "id": "hotswap_005_equation_isolated_p0048_box_94x7s155",
+    "file": "hotswap_005_equation_isolated_p0048_box_94x7s155.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/page-dc728bd5-50a9-41e8-9e5a-d4b01e6664a2.png",
+    "page_index": 48,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "academic_literature",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [],
+      "subset": "equation_hard"
+    },
+    "category_type": "equation_isolated",
+    "anno_id": "box-94x7s155",
+    "order": 6,
+    "bbox_xyxy_with_padding": [
+      222,
+      683,
+      1472,
+      812
+    ],
+    "crop_size": [
+      1250,
+      129
+    ],
+    "suggested_prompt": "Formula Recognition:",
+    "ground_truth_source": "latex",
+    "ground_truth": "$$\\lesssim\\int_{Q}A_{\\tilde{\\mathcal{S}},\\eta_{\\tau(1)}}^{k_{\\tau(1)}-t_{\\tau(1)}} ( |g\\lambda|\\left(\\sum_{P\\in\\tilde{\\mathcal{S}},P\\subseteq Q}\\eta_{\\tau(2),P}\\chi_{P}(x))^{k_{\\tau(2)}-t_{\\tau(2)}}\\left(\\sum_{P\\in\\tilde{\\mathcal{S}},P\\subseteq Q}\\eta_{\\tau(3),P}\\chi_{P}(x)\\right)^{k_{\\tau(3)}-t_{\\tau(3)}}\\right)$$"
+  },
+  {
+    "id": "hotswap_006_equation_isolated_p0060_box_hj8i31zs",
+    "file": "hotswap_006_equation_isolated_p0060_box_hj8i31zs.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/page-b0bdb7a8-c7de-4e6c-9e9c-bf979f3a3227.png",
+    "page_index": 60,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "academic_literature",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [],
+      "subset": "equation_hard"
+    },
+    "category_type": "equation_isolated",
+    "anno_id": "box-hj8i31zs",
+    "order": 21,
+    "bbox_xyxy_with_padding": [
+      336,
+      1704,
+      1345,
+      1827
+    ],
+    "crop_size": [
+      1009,
+      123
+    ],
+    "suggested_prompt": "Formula Recognition:",
+    "ground_truth_source": "latex",
+    "ground_truth": "$$\\quad + \\sum_{\\nu=1}^{M} \\left\\{ \\lambda_\\nu \\cdot \\Phi_{\\zeta_\\nu*} \\left\\{ \\text{id}- \\mathcal{P}^{\\zeta_\\nu} - \\overline{\\partial} \\mathcal{H}^{\\zeta_\\nu} - \\mathcal{H}^{\\zeta_\\nu} \\overline{\\partial} \\right\\} \\Phi_{\\zeta_\\nu}^* [\\chi_\\nu f] - \\overline{\\partial} \\lambda_\\nu \\wedge \\Phi_{\\zeta_\\nu*} \\mathcal{H}^{\\zeta_\\nu} \\Phi_{\\zeta_\\nu}^* [\\chi_\\nu f] \\right\\}$$"
+  },
+  {
+    "id": "hotswap_007_equation_isolated_p0077_box_id_10",
+    "file": "hotswap_007_equation_isolated_p0077_box_id_10.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/page-8cbbe0d4-a3a8-4533-a620-048bebfa714b.png",
+    "page_index": 77,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "academic_literature",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [],
+      "subset": "equation_hard"
+    },
+    "category_type": "equation_isolated",
+    "anno_id": "box_id_10",
+    "order": 10,
+    "bbox_xyxy_with_padding": [
+      657,
+      943,
+      1039,
+      999
+    ],
+    "crop_size": [
+      382,
+      56
+    ],
+    "suggested_prompt": "Formula Recognition:",
+    "ground_truth_source": "latex",
+    "ground_truth": "$$W\\left( {{i}_{1},{i}_{k}}\\right)  + \\cdots  + W\\left( {{i}_{k - 1},{i}_{k}}\\right) .$$"
+  },
+  {
+    "id": "hotswap_008_equation_isolated_p0092_box_leku6qd9",
+    "file": "hotswap_008_equation_isolated_p0092_box_leku6qd9.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/page-39f38730-0ae6-4cfe-8b99-c65d06d09544.png",
+    "page_index": 92,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "academic_literature",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [],
+      "subset": "equation_hard"
+    },
+    "category_type": "equation_isolated",
+    "anno_id": "box-leku6qd9",
+    "order": 15,
+    "bbox_xyxy_with_padding": [
+      183,
+      1148,
+      1161,
+      1285
+    ],
+    "crop_size": [
+      978,
+      137
+    ],
+    "suggested_prompt": "Formula Recognition:",
+    "ground_truth_source": "latex",
+    "ground_truth": "$$\\alpha\\partial^{\\beta+e_{x}}\\mathring{K}=\\Sigma^{-1}\\eta_{x}\\partial^{\\beta+e_{t}}\\mathring{K}+\\sum_{\\substack{\nje_{x}+\\gamma_{2}+\\gamma_{3}=\\beta \\\\ j \\ge 1\n}}\\binom{\\beta}{je_{x}\\gamma_{2}\\gamma_{3}}\\partial_{x}^{j-1}(\\Sigma^{-1})_{x}\\partial^{\\gamma_{2}}\\eta_{x}\\partial^{\\gamma_{3}+e_{t}}\\mathring{K}$$"
+  },
+  {
+    "id": "hotswap_009_equation_isolated_p0434_7",
+    "file": "hotswap_009_equation_isolated_p0434_7.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/docstructbench_llm-raw-scihub-o.O-ceat.200600410.pdf_5.jpg",
+    "page_index": 434,
+    "page_no": 5,
+    "page_attribute": {
+      "data_source": "academic_literature",
+      "language": "english",
+      "layout": "double_column",
+      "special_issue": [
+        "table_fewer_line",
+        "table_horizontal"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "equation_isolated",
+    "anno_id": 7,
+    "order": 9,
+    "bbox_xyxy_with_padding": [
+      813,
+      1345,
+      1139,
+      1437
+    ],
+    "crop_size": [
+      326,
+      92
+    ],
+    "suggested_prompt": "Formula Recognition:",
+    "ground_truth_source": "latex",
+    "ground_truth": "$$\nK ( x_{\\mathrm{i}}, x_{\\mathrm{j}} )=\\operatorname{e x p} (-\\frac{\\left\\| x_{\\mathrm{i}}-x_{\\mathrm{j}} \\right\\|^{2}} {c} )\n$$"
+  },
+  {
+    "id": "hotswap_010_equation_isolated_p0550_20",
+    "file": "hotswap_010_equation_isolated_p0550_20.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/yanbaopptmerge_abef2a4978ae4d13e931f0392502bd40.pdf_1287.jpg",
+    "page_index": 550,
+    "page_no": 1287,
+    "page_attribute": {
+      "data_source": "book",
+      "language": "english",
+      "layout": "three_column",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "equation_isolated",
+    "anno_id": 20,
+    "order": 122,
+    "bbox_xyxy_with_padding": [
+      245,
+      1490,
+      398,
+      1553
+    ],
+    "crop_size": [
+      153,
+      63
+    ],
+    "suggested_prompt": "Formula Recognition:",
+    "ground_truth_source": "latex",
+    "ground_truth": "$$\n2 4 r^{2}+6 r s\n$$"
+  },
+  {
+    "id": "hotswap_011_equation_isolated_p0773_box_edzzq0xo",
+    "file": "hotswap_011_equation_isolated_p0773_box_edzzq0xo.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/jiaocaineedrop_jiaocai_needrop_en_2518.jpg",
+    "page_index": 773,
+    "page_no": 2242,
+    "page_attribute": {
+      "data_source": "exam_paper",
+      "language": "simplified_chinese",
+      "layout": "other_layout",
+      "special_issue": [
+        "watermark",
+        "colorful_backgroud"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "equation_isolated",
+    "anno_id": "box-edzzq0xo",
+    "order": 33,
+    "bbox_xyxy_with_padding": [
+      147,
+      1332,
+      304,
+      1388
+    ],
+    "crop_size": [
+      157,
+      56
+    ],
+    "suggested_prompt": "Formula Recognition:",
+    "ground_truth_source": "latex",
+    "ground_truth": "$$91-28\\approx$$"
+  },
+  {
+    "id": "hotswap_012_equation_isolated_p1404_10",
+    "file": "hotswap_012_equation_isolated_p1404_10.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/book_zh_YDT10512018_extracted_page_30.png",
+    "page_index": 1404,
+    "page_no": 30,
+    "page_attribute": {
+      "data_source": "book",
+      "language": "simplified_chinese",
+      "layout": "single_column",
+      "special_issue": [
+        "table_full_line",
+        "table_horizontal"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "equation_isolated",
+    "anno_id": 10,
+    "order": 10,
+    "bbox_xyxy_with_padding": [
+      136,
+      216,
+      411,
+      259
+    ],
+    "crop_size": [
+      275,
+      43
+    ],
+    "suggested_prompt": "Formula Recognition:",
+    "ground_truth_source": "latex",
+    "ground_truth": "$$\n平均年停电次数= 市电在一年统计期内平均停电次数\n$$"
+  },
+  {
+    "id": "hotswap_013_equation_isolated_p1450_4",
+    "file": "hotswap_013_equation_isolated_p1450_4.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/book_en_国外数学教材-数论-Melvyn B. Nathanson—Elementary Methods in Number Theory_0363.png",
+    "page_index": 1450,
+    "page_no": 363,
+    "page_attribute": {
+      "data_source": "book",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "equation_isolated",
+    "anno_id": 4,
+    "order": 4,
+    "bbox_xyxy_with_padding": [
+      590,
+      470,
+      736,
+      559
+    ],
+    "crop_size": [
+      146,
+      89
+    ],
+    "suggested_prompt": "Formula Recognition:",
+    "ground_truth_source": "latex",
+    "ground_truth": "$$\n| a _ { k } | \\geq { \\frac { 1 } { k ! } } .\n$$"
+  },
+  {
+    "id": "hotswap_014_equation_isolated_p1536_25",
+    "file": "hotswap_014_equation_isolated_p1536_25.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/exam_paper_en-file-putnam-archive_1999_Solutions_1999s_page_003.png",
+    "page_index": 1536,
+    "page_no": 3,
+    "page_attribute": {
+      "data_source": "exam_paper",
+      "language": "english",
+      "layout": "double_column",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "equation_isolated",
+    "anno_id": 25,
+    "order": 25,
+    "bbox_xyxy_with_padding": [
+      986,
+      1161,
+      1452,
+      1248
+    ],
+    "crop_size": [
+      466,
+      87
+    ],
+    "suggested_prompt": "Formula Recognition:",
+    "ground_truth_source": "latex",
+    "ground_truth": "$$ \\lim_{(x,y) \\to (1,1)} xy(1+x+y+xy-x^2y^2) = 3. $$"
+  },
+  {
+    "id": "hotswap_015_equation_isolated_p1563_1",
+    "file": "hotswap_015_equation_isolated_p1563_1.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/exam_paper_en-file-putnam-archive_2005_Solutions_2005s_page_004.png",
+    "page_index": 1563,
+    "page_no": 4,
+    "page_attribute": {
+      "data_source": "exam_paper",
+      "language": "english",
+      "layout": "double_column",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "equation_isolated",
+    "anno_id": 1,
+    "order": 2,
+    "bbox_xyxy_with_padding": [
+      218,
+      182,
+      759,
+      286
+    ],
+    "crop_size": [
+      541,
+      104
+    ],
+    "suggested_prompt": "Formula Recognition:",
+    "ground_truth_source": "latex",
+    "ground_truth": "$$I = \\left( \\int_{0}^{1} \\frac{xdx}{1+x^{2}} \\right)\\left( \\int_{0}^{1} \\frac{1}{1+y^{2}} \\right) = \\log(2) \\cdot \\frac{\\pi}{8}.$$"
+  },
+  {
+    "id": "hotswap_016_equation_isolated_p1643_4",
+    "file": "hotswap_016_equation_isolated_p1643_4.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/PPT_StewartCalcET7e_03_02_page_014.png",
+    "page_index": 1643,
+    "page_no": 14,
+    "page_attribute": {
+      "data_source": "PPT2PDF",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "equation_isolated",
+    "anno_id": 4,
+    "order": 5,
+    "bbox_xyxy_with_padding": [
+      515,
+      1153,
+      938,
+      1336
+    ],
+    "crop_size": [
+      423,
+      183
+    ],
+    "suggested_prompt": "Formula Recognition:",
+    "ground_truth_source": "latex",
+    "ground_truth": "$$\n= \\frac { v \\Delta u - u \\Delta v } { v ( v + \\Delta v ) }\n$$"
+  },
+  {
+    "id": "hotswap_017_figure_caption_p0019_box_id_1",
+    "file": "hotswap_017_figure_caption_p0019_box_id_1.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/page-bb98165a-8033-4ea4-a527-58ac974f2c32.png",
+    "page_index": 19,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "book",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [],
+      "subset": "equation_hard"
+    },
+    "category_type": "figure_caption",
+    "anno_id": "box_id_1",
+    "order": 4,
+    "bbox_xyxy_with_padding": [
+      834,
+      630,
+      1244,
+      725
+    ],
+    "crop_size": [
+      410,
+      95
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "Figure 5.15 The parabolically terminated cubic spline."
+  },
+  {
+    "id": "hotswap_018_figure_caption_p0432_6",
+    "file": "hotswap_018_figure_caption_p0432_6.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/docstructbench_llm-raw-scihub-o.O-bf00326833.pdf_3.jpg",
+    "page_index": 432,
+    "page_no": 3,
+    "page_attribute": {
+      "data_source": "academic_literature",
+      "language": "english",
+      "layout": "double_column",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "figure_caption",
+    "anno_id": 6,
+    "order": 8,
+    "bbox_xyxy_with_padding": [
+      111,
+      1994,
+      765,
+      2047
+    ],
+    "crop_size": [
+      654,
+      53
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "Fig. 3. Thirty bolus profiles in a three-dimensional presentation"
+  },
+  {
+    "id": "hotswap_019_figure_caption_p0624_31",
+    "file": "hotswap_019_figure_caption_p0624_31.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/docstructbench_enbook-zlib-o.O-19091739.pdf_181.jpg",
+    "page_index": 624,
+    "page_no": 124,
+    "page_attribute": {
+      "data_source": "colorful_textbook",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [
+        "colorful_backgroud"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "figure_caption",
+    "anno_id": 31,
+    "order": 13,
+    "bbox_xyxy_with_padding": [
+      1199,
+      845,
+      1523,
+      1045
+    ],
+    "crop_size": [
+      324,
+      200
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "Figure 29.3 (Example 29.1) (a) A thin, straight wire carrying a current I (b) The angles $ \\theta_{1} $ and $ \\theta_{2} $ are used for determining the net field."
+  },
+  {
+    "id": "hotswap_020_figure_caption_p0795_18",
+    "file": "hotswap_020_figure_caption_p0795_18.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/jiaocaineedrop_jiaocai_needrop_en_2991.jpg",
+    "page_index": 795,
+    "page_no": 2336,
+    "page_attribute": {
+      "data_source": "magazine",
+      "language": "simplified_chinese",
+      "layout": "other_layout",
+      "special_issue": [
+        "colorful_backgroud"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "figure_caption",
+    "anno_id": 18,
+    "order": 10,
+    "bbox_xyxy_with_padding": [
+      894,
+      1034,
+      1292,
+      1311
+    ],
+    "crop_size": [
+      398,
+      277
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "山羊（麦秆）  现代   山东\n这是一件完全用麦秸秆编结的山羊，形态精准，简练概括，生动传神。作者抓住了这种动物鲜明的特征：修而矫健的身体和弯弯的羊角。尽管材料极端寻常，然而丝毫无损其高超的艺术水平。"
+  },
+  {
+    "id": "hotswap_021_figure_caption_p1056_50",
+    "file": "hotswap_021_figure_caption_p1056_50.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/newspaper_5aedf678eff04d8ebac3692d54103e19_1.jpg",
+    "page_index": 1056,
+    "page_no": 1,
+    "page_attribute": {
+      "data_source": "newspaper",
+      "language": "simplified_chinese",
+      "layout": "other_layout",
+      "special_issue": [],
+      "subset": "v1.5"
+    },
+    "category_type": "figure_caption",
+    "anno_id": 50,
+    "order": 42,
+    "bbox_xyxy_with_padding": [
+      1755,
+      2884,
+      2145,
+      2942
+    ],
+    "crop_size": [
+      390,
+      58
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "图为外国游客体验大兴田园生活。"
+  },
+  {
+    "id": "hotswap_022_figure_caption_p1126_1",
+    "file": "hotswap_022_figure_caption_p1126_1.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/eastmoney_34d623c64d12b5f02ffe4bff74f464b368270b1d6930192876bfe353d8fd6c30.pdf_0.jpg",
+    "page_index": 1126,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "research_report",
+      "language": "simplified_chinese",
+      "layout": "1andmore_column",
+      "special_issue": [
+        "table_horizontal",
+        "table_wireless_line"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "figure_caption",
+    "anno_id": 1,
+    "order": 8,
+    "bbox_xyxy_with_padding": [
+      108,
+      962,
+      303,
+      1030
+    ],
+    "crop_size": [
+      195,
+      68
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "市场表现"
+  },
+  {
+    "id": "hotswap_023_figure_caption_p1365_45",
+    "file": "hotswap_023_figure_caption_p1365_45.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/newspaper_The Globe and Mail - 2025-1-8@magazinesclubnew_page_027.png",
+    "page_index": 1365,
+    "page_no": 27,
+    "page_attribute": {
+      "data_source": "newspaper",
+      "language": "english",
+      "layout": "other_layout",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "figure_caption",
+    "anno_id": 45,
+    "order": 1,
+    "bbox_xyxy_with_padding": [
+      710,
+      343,
+      890,
+      399
+    ],
+    "crop_size": [
+      180,
+      56
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "LEAFS VS. FLYERS"
+  },
+  {
+    "id": "hotswap_024_figure_caption_p1627_15",
+    "file": "hotswap_024_figure_caption_p1627_15.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/magazine_TheEconomist.2024.02.24_page_008.png",
+    "page_index": 1627,
+    "page_no": 8,
+    "page_attribute": {
+      "data_source": "magazine",
+      "language": "english",
+      "layout": "other_layout",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "figure_caption",
+    "anno_id": 15,
+    "order": 14,
+    "bbox_xyxy_with_padding": [
+      2356,
+      1482,
+      3006,
+      1567
+    ],
+    "crop_size": [
+      650,
+      85
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "$\\%$ change on previous quarter"
+  },
+  {
+    "id": "hotswap_025_footer_p0111_box_b35jg4f3",
+    "file": "hotswap_025_footer_p0111_box_b35jg4f3.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/page-942ac90d-4704-43f3-9286-719c7be9e655.png",
+    "page_index": 111,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "historical_document",
+      "language": "traditional_chinese",
+      "layout": "other_layout",
+      "special_issue": [],
+      "subset": "layout_hard"
+    },
+    "category_type": "footer",
+    "anno_id": "box-b35jg4f3",
+    "order": 8,
+    "bbox_xyxy_with_padding": [
+      71,
+      266,
+      123,
+      473
+    ],
+    "crop_size": [
+      52,
+      207
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "卷一 初見秦第一"
+  },
+  {
+    "id": "hotswap_026_footer_p0628_3",
+    "file": "hotswap_026_footer_p0628_3.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/docstructbench_llm-raw-scihub-o.O-ceat.200600410.pdf_8.jpg",
+    "page_index": 628,
+    "page_no": 203,
+    "page_attribute": {
+      "data_source": "academic_literature",
+      "language": "english",
+      "layout": "1andmore_column",
+      "special_issue": [
+        "table_fewer_line",
+        "table_horizontal",
+        "table_span",
+        "table_with_formula"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "footer",
+    "anno_id": 3,
+    "order": null,
+    "bbox_xyxy_with_padding": [
+      1260,
+      2040,
+      1544,
+      2098
+    ],
+    "crop_size": [
+      284,
+      58
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "http://www.cet-journal.com"
+  },
+  {
+    "id": "hotswap_027_footer_p1065_101",
+    "file": "hotswap_027_footer_p1065_101.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/newspaper_635e4e6a64cf2ccfb2560f9b6dfe24b5_1.jpg",
+    "page_index": 1065,
+    "page_no": 1,
+    "page_attribute": {
+      "data_source": "newspaper",
+      "language": "simplified_chinese",
+      "layout": "other_layout",
+      "special_issue": [],
+      "subset": "v1.5"
+    },
+    "category_type": "footer",
+    "anno_id": 101,
+    "order": null,
+    "bbox_xyxy_with_padding": [
+      0,
+      3884,
+      2754,
+      3939
+    ],
+    "crop_size": [
+      2754,
+      55
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "地址：北京市朝阳区惠新西街15号邮政编码：100029电话中继线：(010）84395001或85815522电传：(010)65832154广告热线：(010)85834401国内统一刊号：CN11—0055广告经营许可证：京朝工商广字第0055号每份：0.63元月价：16.5元农民日报印刷厂印刷"
+  },
+  {
+    "id": "hotswap_028_footer_p1650_8",
+    "file": "hotswap_028_footer_p1650_8.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/PPT_PresentationSpecification_page_025.png",
+    "page_index": 1650,
+    "page_no": 25,
+    "page_attribute": {
+      "data_source": "PPT2PDF",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "footer",
+    "anno_id": 8,
+    "order": null,
+    "bbox_xyxy_with_padding": [
+      1685,
+      1370,
+      1897,
+      1449
+    ],
+    "crop_size": [
+      212,
+      79
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "5/21/2025"
+  },
+  {
+    "id": "hotswap_029_header_p0000_box_id_11",
+    "file": "hotswap_029_header_p0000_box_id_11.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/page-d1561665-5359-42fe-920c-d6e3bff81953.png",
+    "page_index": 0,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "book",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [],
+      "subset": "equation_hard"
+    },
+    "category_type": "header",
+    "anno_id": "box_id_11",
+    "order": 0,
+    "bbox_xyxy_with_padding": [
+      256,
+      224,
+      939,
+      285
+    ],
+    "crop_size": [
+      683,
+      61
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "SEC.3.2 PROPERTIES OF VECTORS AND MATRICES"
+  },
+  {
+    "id": "hotswap_030_header_p0526_8",
+    "file": "hotswap_030_header_p0526_8.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/docstructbench_dianzishu_zhongwenzaixian-o.O-63684502.pdf_263.jpg",
+    "page_index": 526,
+    "page_no": 263,
+    "page_attribute": {
+      "data_source": "book",
+      "language": "simplified_chinese",
+      "layout": "single_column",
+      "special_issue": [
+        "table_horizontal",
+        "table_omission_line"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "header",
+    "anno_id": 8,
+    "order": null,
+    "bbox_xyxy_with_padding": [
+      823,
+      104,
+      1319,
+      168
+    ],
+    "crop_size": [
+      496,
+      64
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "第5章 大数据应用的实践方法与案例"
+  },
+  {
+    "id": "hotswap_031_header_p1016_0",
+    "file": "hotswap_031_header_p1016_0.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/newspaper_0b86dae4d8f328a0e79d9ac394000dec_1.jpg",
+    "page_index": 1016,
+    "page_no": 1,
+    "page_attribute": {
+      "data_source": "newspaper",
+      "language": "simplified_chinese",
+      "layout": "other_layout",
+      "special_issue": [],
+      "subset": "v1.5"
+    },
+    "category_type": "header",
+    "anno_id": 0,
+    "order": null,
+    "bbox_xyxy_with_padding": [
+      17,
+      0,
+      257,
+      93
+    ],
+    "crop_size": [
+      240,
+      93
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "農民日報"
+  },
+  {
+    "id": "hotswap_032_header_p1153_2",
+    "file": "hotswap_032_header_p1153_2.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/eastmoney_d201644f6fbc869ea857c5d9f8ec38adc54250a94b77d826280b0d1c25d13a13.pdf_4.jpg",
+    "page_index": 1153,
+    "page_no": 4,
+    "page_attribute": {
+      "data_source": "research_report",
+      "language": "simplified_chinese",
+      "layout": "single_column",
+      "special_issue": [
+        "table_fewer_line",
+        "table_horizontal",
+        "table_span"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "header",
+    "anno_id": 2,
+    "order": null,
+    "bbox_xyxy_with_padding": [
+      1047,
+      129,
+      1549,
+      192
+    ],
+    "crop_size": [
+      502,
+      63
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "华特达因（000915）2023年年报点评"
+  },
+  {
+    "id": "hotswap_033_header_p1639_4",
+    "file": "hotswap_033_header_p1639_4.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/PPT_lay_linalg5_01_05_page_009.png",
+    "page_index": 1639,
+    "page_no": 9,
+    "page_attribute": {
+      "data_source": "PPT2PDF",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "header",
+    "anno_id": 4,
+    "order": null,
+    "bbox_xyxy_with_padding": [
+      82,
+      98,
+      1829,
+      232
+    ],
+    "crop_size": [
+      1747,
+      134
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "SOLUTIONS OF NONHOMOGENEOUS SYSTEMS"
+  },
+  {
+    "id": "hotswap_034_page_footnote_p0090_box_id_18",
+    "file": "hotswap_034_page_footnote_p0090_box_id_18.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/page-27a46d41-49b5-4562-a546-6cbbafd23a81.png",
+    "page_index": 90,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "book",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [],
+      "subset": "equation_hard"
+    },
+    "category_type": "page_footnote",
+    "anno_id": "box_id_18",
+    "order": 22,
+    "bbox_xyxy_with_padding": [
+      219,
+      2021,
+      848,
+      2075
+    ],
+    "crop_size": [
+      629,
+      54
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "$ {}^{1} $ These are also known as Macdonald difference operators."
+  },
+  {
+    "id": "hotswap_035_page_footnote_p1609_10",
+    "file": "hotswap_035_page_footnote_p1609_10.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/magazine_TheEconomist.2023.12.23_page_052.png",
+    "page_index": 1609,
+    "page_no": 52,
+    "page_attribute": {
+      "data_source": "magazine",
+      "language": "english",
+      "layout": "1andmore_column",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "page_footnote",
+    "anno_id": 10,
+    "order": null,
+    "bbox_xyxy_with_padding": [
+      755,
+      6014,
+      2372,
+      6242
+    ],
+    "crop_size": [
+      1617,
+      228
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "SHENZHEN\nChina's beach culture is a microcosm of society"
+  },
+  {
+    "id": "hotswap_036_reference_p0185_box_id_2",
+    "file": "hotswap_036_reference_p0185_box_id_2.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/page-0b011030-84e4-49e3-adfb-437c96b9947d.png",
+    "page_index": 185,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "academic_literature",
+      "language": "en_ch_mixed",
+      "layout": "single_column",
+      "special_issue": [],
+      "subset": "layout_hard"
+    },
+    "category_type": "reference",
+    "anno_id": "box_id_2",
+    "order": 4,
+    "bbox_xyxy_with_padding": [
+      203,
+      586,
+      1126,
+      698
+    ],
+    "crop_size": [
+      923,
+      112
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "范子英、李欣：“部长的政治关联效应与财政转移支付分配”，《经济研究》2014年第6期。"
+  },
+  {
+    "id": "hotswap_037_reference_p1282_16",
+    "file": "hotswap_037_reference_p1282_16.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/PPT_13 fallacies LALT2012_page_010.png",
+    "page_index": 1282,
+    "page_no": 10,
+    "page_attribute": {
+      "data_source": "PPT2PDF",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "reference",
+    "anno_id": 16,
+    "order": 12,
+    "bbox_xyxy_with_padding": [
+      85,
+      1221,
+      1822,
+      1332
+    ],
+    "crop_size": [
+      1737,
+      111
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "Modiano, M. 1999. 'Standard English(es) and educational practices for the world's lingua franca' in\nEnglish Today 60: 3-13."
+  },
+  {
+    "id": "hotswap_038_table_p0010_box_id_1",
+    "file": "hotswap_038_table_p0010_box_id_1.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/page-f9583127-1277-4424-be9d-35430e0aedd6.png",
+    "page_index": 10,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "academic_literature",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [],
+      "subset": "equation_hard"
+    },
+    "category_type": "table",
+    "anno_id": "box_id_1",
+    "order": 1,
+    "bbox_xyxy_with_padding": [
+      590,
+      338,
+      1112,
+      584
+    ],
+    "crop_size": [
+      522,
+      246
+    ],
+    "suggested_prompt": "Table Recognition:",
+    "ground_truth_source": "html",
+    "ground_truth": "<table><tr><td>Dimension $(D)$</td><td>$d_{w}$</td><td>$d_{a}$</td><td>$d_{ν}$</td><td>$d_{g}$</td></tr><tr><td>768</td><td>64</td><td>64</td><td>32</td><td>128</td></tr><tr><td>1024</td><td>64</td><td>64</td><td>32</td><td>128</td></tr><tr><td>2048</td><td>96</td><td>96</td><td>64</td><td>256</td></tr><tr><td>2560</td><td>96</td><td>96</td><td>64</td><td>320</td></tr><tr><td>4096</td><td>128</td><td>128</td><td>96</td><td>480</td></tr><tr><td>6144</td><td>128</td><td>128</td><td>96</td><td>640</td></tr></table>"
+  },
+  {
+    "id": "hotswap_039_table_p0243_box_id_1",
+    "file": "hotswap_039_table_p0243_box_id_1.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/page-349417c3-e5f4-4dae-b018-7323ef36b04e.png",
+    "page_index": 243,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "research_report",
+      "language": "simplified_chinese",
+      "layout": "single_column",
+      "special_issue": [],
+      "subset": "table_hard"
+    },
+    "category_type": "table",
+    "anno_id": "box_id_1",
+    "order": 3,
+    "bbox_xyxy_with_padding": [
+      321,
+      283,
+      1465,
+      836
+    ],
+    "crop_size": [
+      1144,
+      553
+    ],
+    "suggested_prompt": "Table Recognition:",
+    "ground_truth_source": "html",
+    "ground_truth": "<table><tr><td rowspan=\"2\"></td><td rowspan=\"2\">附注</td><td colspan=\"2\">本集团</td><td colspan=\"2\">本行</td></tr><tr><td>2014年</td><td>2013年</td><td>2014年</td><td>2013年</td></tr><tr><td>对子公司的投资</td><td>(a)</td><td>-</td><td>-</td><td>41,432</td><td>37,215</td></tr><tr><td>对合营公司的投资</td><td>(b)</td><td>1,465</td><td>759</td><td>1,223</td><td>587</td></tr><tr><td>对联营公司的投资</td><td>(c)</td><td>19</td><td>19</td><td>-</td><td>-</td></tr><tr><td>小计</td><td></td><td>1,484</td><td>778</td><td>42,655</td><td>37,802</td></tr><tr><td>减:减值准备</td><td></td><td>-</td><td>-</td><td>(1,768)</td><td>(1,768)</td></tr><tr><td>合计</td><td></td><td>1,484</td><td>778</td><td>40,887</td><td>36,034</td></tr></table>"
+  },
+  {
+    "id": "hotswap_040_table_p0297_5",
+    "file": "hotswap_040_table_p0297_5.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/eastmoney_7cae1642250a3dbabfef7624d3424ec6e162ae91c8de4acfa89a9779092b0189.pdf_16.jpg",
+    "page_index": 297,
+    "page_no": 16,
+    "page_attribute": {
+      "data_source": "PPT2PDF",
+      "language": "simplified_chinese",
+      "layout": "single_column",
+      "special_issue": [
+        "table_fewer_line",
+        "table_horizontal"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "table",
+    "anno_id": 5,
+    "order": 4,
+    "bbox_xyxy_with_padding": [
+      94,
+      297,
+      2575,
+      1390
+    ],
+    "crop_size": [
+      2481,
+      1093
+    ],
+    "suggested_prompt": "Table Recognition:",
+    "ground_truth_source": "html",
+    "ground_truth": "<table border=\"1\"><tr><td>企业类型</td><td>目的</td><td>模式和特点</td><td>优势</td><td>典型企业</td></tr><tr><td>云服务提供商</td><td><li>以物联网为抓手带动上层应用服务业绩增长<i></i></li></td><td><li>目前多以提供底层计算资源、提供应用使能平台为主<i></i></li></td><td><li>在互联网领域中积累了丰富的技术、商业、生态优势经验<i>\n<li>底层IaaS能力突出、共性技术能力提炼<i></i></li></i></li></td><td>阿里云、腾讯云、百度云、亚马逊AWS IoT等</td></tr><tr><td>通信领域厂商</td><td><li>获得流量业务收入，战略布局物联网，把握新增市场机遇<i></i></li></td><td><li>多以连接管理、应用使能为平台主要功能服务为主<i></i></li></td><td><li>在连接管理平台具有绝对优势，具有全球通用连接能力<i></i></li></td><td>电信运营商、通信设备厂商，中国电信天翼物联、如中国移动ONENet、中国联通物联网平台、华为云IoT等</td></tr><tr><td>软件系统服务商</td><td><li>解决内部开发效率的问题，优化产品服务<i></i></li></td><td><li>以应用开发平台为主要服务内容为主<i></i></li></td><td><li>擅长软件设计、生产、管理、运维等服务，具备丰富的行业软件开发及服务经验<i></i></li></td><td>紫光云、广联达筑联等</td></tr><tr><td>垂直领域传统厂商</td><td><li>利用自身对行业的理解与经验，打造垂直型平台，实现传统企业的转型升级<i></i></li></td><td><li>垂直专业领域的物联网平台<i></i></li></td><td><li>深刻的行业理解和行业技术、对行业有深度应用，拥有行业数据和客户资源<i></i></li></td><td>西门子、工业富联、美的M-Smart等企业</td></tr><tr><td>初创企业</td><td><li>看好物联网未来的发展潜能<i></i></li></td><td><li>目前阶段很多初创型平台企业多以SaaS解决方案公司的形式存在<i></i></li></td><td><li>拥有与选定细分行业相关的软件、硬件经验<i>\n<li>服务延伸到通用型平台厂商难以触及的细分领域，形成错位竞争<i></i></li></i></li></td><td>涂鸦智能、云智易、机智云、艾拉物联等</td></tr></table>"
+  },
+  {
+    "id": "hotswap_041_table_p0533_8",
+    "file": "hotswap_041_table_p0533_8.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/docstructbench_dianzishu_zhongwenzaixian-o.O-63710191.pdf_336.jpg",
+    "page_index": 533,
+    "page_no": 336,
+    "page_attribute": {
+      "data_source": "book",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [
+        "table_full_line",
+        "table_horizontal"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "table",
+    "anno_id": 8,
+    "order": 2,
+    "bbox_xyxy_with_padding": [
+      142,
+      280,
+      990,
+      877
+    ],
+    "crop_size": [
+      848,
+      597
+    ],
+    "suggested_prompt": "Table Recognition:",
+    "ground_truth_source": "html",
+    "ground_truth": "<table border=\"1\"><tr><td>Economy</td><td>Stock (Billions of US Dollars)</td><td>Share( %)</td></tr><tr><td>European Union</td><td>86.02</td><td>37.5</td></tr><tr><td>United States</td><td>67.38</td><td>29.4</td></tr><tr><td>Australia</td><td>36.18</td><td>15.8</td></tr><tr><td>Canada</td><td>10.94</td><td>4.8</td></tr><tr><td>Bermuda</td><td>8.59</td><td>3.8</td></tr><tr><td>Switzerland</td><td>8.11</td><td>3.5</td></tr><tr><td>Israel</td><td>4.15</td><td>1.8</td></tr><tr><td>Japan</td><td>3.20</td><td>1.4</td></tr><tr><td>New Zealand</td><td>2.49</td><td>1.1</td></tr><tr><td>Norway</td><td>2.08</td><td>0.9</td></tr><tr><td>Total</td><td>229.13</td><td>100.0</td></tr></table>"
+  },
+  {
+    "id": "hotswap_042_table_p0665_7",
+    "file": "hotswap_042_table_p0665_7.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/jiaocaineedrop_96657786.pdf_0.jpg",
+    "page_index": 665,
+    "page_no": 1546,
+    "page_attribute": {
+      "data_source": "exam_paper",
+      "language": "simplified_chinese",
+      "layout": "double_column",
+      "special_issue": [
+        "table_full_line",
+        "table_horizontal"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "table",
+    "anno_id": 7,
+    "order": 10,
+    "bbox_xyxy_with_padding": [
+      283,
+      773,
+      556,
+      921
+    ],
+    "crop_size": [
+      273,
+      148
+    ],
+    "suggested_prompt": "Table Recognition:",
+    "ground_truth_source": "html",
+    "ground_truth": "<table border=\"1\"><tr><td>得分</td><td></td></tr><tr><td>阅卷人</td><td></td></tr></table>"
+  },
+  {
+    "id": "hotswap_043_table_p0853_2",
+    "file": "hotswap_043_table_p0853_2.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/jiaocaineedrop_jiaocai_needrop_en_854.jpg",
+    "page_index": 853,
+    "page_no": 1919,
+    "page_attribute": {
+      "data_source": "exam_paper",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [
+        "table_horizontal",
+        "table_full_line",
+        "watermark",
+        "fuzzy_scan",
+        "colorful_backgroud"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "table",
+    "anno_id": 2,
+    "order": 3,
+    "bbox_xyxy_with_padding": [
+      230,
+      306,
+      1300,
+      517
+    ],
+    "crop_size": [
+      1070,
+      211
+    ],
+    "suggested_prompt": "Table Recognition:",
+    "ground_truth_source": "html",
+    "ground_truth": "<table border=\"1\"><tr><td>Have you read Little Women yet?</td><td>Yes, I have./No, I haven't.</td></tr><tr><td>Has Tina read Treasure Island yet?</td><td>Yes, she has.She thinks it's fantastic.</td></tr><tr><td>Have you decided which book to write about yet?</td><td>Yes,I have.I've already finished reading it.It was really good.</td></tr></table>"
+  },
+  {
+    "id": "hotswap_044_table_p1129_8",
+    "file": "hotswap_044_table_p1129_8.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/eastmoney_5f75d8df19ab34c706ae823d8ed54f845b6a693e31c0fae19b16cdd94c32a636.pdf_2.jpg",
+    "page_index": 1129,
+    "page_no": 2,
+    "page_attribute": {
+      "data_source": "research_report",
+      "language": "simplified_chinese",
+      "layout": "single_column",
+      "special_issue": [
+        "table_fewer_line",
+        "table_horizontal"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "table",
+    "anno_id": 8,
+    "order": 2,
+    "bbox_xyxy_with_padding": [
+      64,
+      282,
+      814,
+      1426
+    ],
+    "crop_size": [
+      750,
+      1144
+    ],
+    "suggested_prompt": "Table Recognition:",
+    "ground_truth_source": "html",
+    "ground_truth": "<table border=\"1\"><tr><td>资产负债表</td><td>2021A</td><td>2022E</td><td>2023E</td><td>2024E</td></tr><tr><td colspan=\"5\">流动资产:</td></tr><tr><td>现金及现金等价物</td><td>6,974</td><td>9,574</td><td>11,755</td><td>15,059</td></tr><tr><td>应收款</td><td>3,828</td><td>3,946</td><td>4,444</td><td>4,993</td></tr><tr><td>存货</td><td>1,690</td><td>1,739</td><td>1,992</td><td>2,228</td></tr><tr><td>其他流动资产</td><td>6,409</td><td>6,688</td><td>7,091</td><td>7,815</td></tr><tr><td>流动资产合计</td><td>18,901</td><td>21,947</td><td>25,283</td><td>30,095</td></tr><tr><td colspan=\"5\">非流动资产:</td></tr><tr><td>金融类资产</td><td>3,410</td><td>3,597</td><td>3,610</td><td>3,903</td></tr><tr><td>固定资产</td><td>184</td><td>187</td><td>195</td><td>210</td></tr><tr><td>在建工程</td><td>0</td><td>0</td><td>0</td><td>0</td></tr><tr><td>无形资产</td><td>6,444</td><td>6,244</td><td>6,045</td><td>5,733</td></tr><tr><td>长期股权投资</td><td>24</td><td>36</td><td>40</td><td>45</td></tr><tr><td>其他非流动资产</td><td>558</td><td>600</td><td>610</td><td>620</td></tr><tr><td>非流动资产合计</td><td>7,210</td><td>7,067</td><td>6,890</td><td>6,608</td></tr><tr><td>资产总计</td><td>26,111</td><td>29,014</td><td>32,173</td><td>36,703</td></tr><tr><td colspan=\"5\">流动负债:</td></tr><tr><td>短期借款</td><td>39.8</td><td>19.8</td><td>119.8</td><td>167.8</td></tr><tr><td>应付账款、票据</td><td>5,882</td><td>6,620</td><td>7,329</td><td>8,033</td></tr><tr><td>其他流动负债</td><td>1,635</td><td>1,635</td><td>1,635</td><td>1,635</td></tr><tr><td>流动负债合计</td><td>8,885</td><td>9,770</td><td>10,676</td><td>12,579</td></tr><tr><td colspan=\"5\">非流动负债:</td></tr><tr><td>长期借款</td><td>0.0</td><td>0.0</td><td>0.0</td><td>0.0</td></tr><tr><td>其他非流动负债</td><td>229</td><td>229</td><td>229</td><td>229</td></tr><tr><td>非流动负债合计</td><td>229</td><td>284</td><td>287</td><td>289</td></tr><tr><td>负债合计</td><td>9,114</td><td>10,054</td><td>10,963</td><td>12,868</td></tr><tr><td colspan=\"5\">所有者权益:</td></tr><tr><td>股本</td><td>1,871</td><td>1,871</td><td>1,871</td><td>1,871</td></tr><tr><td>股东权益</td><td>16,997</td><td>18,961</td><td>21,210</td><td>23,835</td></tr><tr><td>负债和所有者权益</td><td>26,111</td><td>29,014</td><td>32,173</td><td>36,703</td></tr></table>"
+  },
+  {
+    "id": "hotswap_045_table_p1180_15",
+    "file": "hotswap_045_table_p1180_15.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/yanbaopptmerge_4304d65458262c3161cf5d0440c6a56851222ce1da3d7886cdd2320ce2222c4a.pdf_7.jpg",
+    "page_index": 1180,
+    "page_no": 7,
+    "page_attribute": {
+      "data_source": "research_report",
+      "language": "simplified_chinese",
+      "layout": "1andmore_column",
+      "special_issue": [
+        "table_fewer_line",
+        "table_horizontal",
+        "table_span"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "table",
+    "anno_id": 15,
+    "order": 14,
+    "bbox_xyxy_with_padding": [
+      456,
+      1930,
+      1392,
+      2065
+    ],
+    "crop_size": [
+      936,
+      135
+    ],
+    "suggested_prompt": "Table Recognition:",
+    "ground_truth_source": "html",
+    "ground_truth": "<table border=\"1\"><tr><td rowspan=\"2\">公司代码</td><td rowspan=\"2\">公司名称</td><td rowspan=\"2\">投资评级</td><td rowspan=\"2\">昨收盘（元）</td><td rowspan=\"2\">总市值(亿元)</td><td colspan=\"2\">EPS</td><td colspan=\"2\">P/EV</td></tr><tr><td>2023E</td><td>2024E</td><td>2023E</td><td>2024E)</td></tr><tr><td>601628</td><td>中国人寿</td><td>买入</td><td>27.92</td><td>7891.5</td><td>49.10</td><td>55.04</td><td>0.71</td><td>0.64</td></tr><tr><td>601336</td><td>新华保险</td><td>增持</td><td>30.12</td><td>939.6</td><td>5.12</td><td>8.21</td><td>0.56</td><td>0.51</td></tr></table>"
+  },
+  {
+    "id": "hotswap_046_table_p1367_71",
+    "file": "hotswap_046_table_p1367_71.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/newspaper_Chicago Tribune_0801@magazinesclubnew_page_019.png",
+    "page_index": 1367,
+    "page_no": 19,
+    "page_attribute": {
+      "data_source": "newspaper",
+      "language": "english",
+      "layout": "other_layout",
+      "special_issue": [
+        "table_fewer_line",
+        "table_horizontal",
+        "table_span"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "table",
+    "anno_id": 71,
+    "order": 43,
+    "bbox_xyxy_with_padding": [
+      1389,
+      1683,
+      1676,
+      1786
+    ],
+    "crop_size": [
+      287,
+      103
+    ],
+    "suggested_prompt": "Table Recognition:",
+    "ground_truth_source": "html",
+    "ground_truth": "<table><tr><td>Prime Rate</td><td>7.50</td></tr><tbody><tr><td>Discount Rate Primary</td><td>4.40</td></tr><tr><td>Fed Funds Target</td><td>4.25-4.50</td></tr><tr><td>Money Mkt Overnight Avg.</td><td>0.41</td></tr></tbody></table>"
+  },
+  {
+    "id": "hotswap_047_table_p1637_5",
+    "file": "hotswap_047_table_p1637_5.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/PPT_PresentationSpecification_page_010.png",
+    "page_index": 1637,
+    "page_no": 10,
+    "page_attribute": {
+      "data_source": "PPT2PDF",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "table",
+    "anno_id": 5,
+    "order": 6,
+    "bbox_xyxy_with_padding": [
+      308,
+      1018,
+      1848,
+      1187
+    ],
+    "crop_size": [
+      1540,
+      169
+    ],
+    "suggested_prompt": "Table Recognition:",
+    "ground_truth_source": "html",
+    "ground_truth": "<table><tr><td>~6-min full video by Mar 11</td><td>Tutorial: introduction and view video presentation</td><td>7-10 min tutorial discussion, Q&amp;A </td></tr></table>"
+  },
+  {
+    "id": "hotswap_048_table_caption_p0010_box_id_2",
+    "file": "hotswap_048_table_caption_p0010_box_id_2.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/page-f9583127-1277-4424-be9d-35430e0aedd6.png",
+    "page_index": 10,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "academic_literature",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [],
+      "subset": "equation_hard"
+    },
+    "category_type": "table_caption",
+    "anno_id": "box_id_2",
+    "order": 2,
+    "bbox_xyxy_with_padding": [
+      316,
+      611,
+      1372,
+      669
+    ],
+    "crop_size": [
+      1056,
+      58
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "Table 16: Suggested Intermediate Dimensions for the low-rank MLPs for RWKV-7 models"
+  },
+  {
+    "id": "hotswap_049_table_caption_p0291_box_id_1",
+    "file": "hotswap_049_table_caption_p0291_box_id_1.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/page-f3e750d8-8201-4a22-9419-9776798b7a32.png",
+    "page_index": 291,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "academic_literature",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [],
+      "subset": "table_hard"
+    },
+    "category_type": "table_caption",
+    "anno_id": "box_id_1",
+    "order": 1,
+    "bbox_xyxy_with_padding": [
+      564,
+      2015,
+      1130,
+      2069
+    ],
+    "crop_size": [
+      566,
+      54
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "Table 2: Global results for sosie synthesis"
+  },
+  {
+    "id": "hotswap_050_table_caption_p0683_12",
+    "file": "hotswap_050_table_caption_p0683_12.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/jiaocaineedrop_chem-354334.pdf_20.jpg",
+    "page_index": 683,
+    "page_no": 1655,
+    "page_attribute": {
+      "data_source": "colorful_textbook",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [
+        "table_horizontal",
+        "table_full_line",
+        "colorful_backgroud"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "table_caption",
+    "anno_id": 12,
+    "order": 3,
+    "bbox_xyxy_with_padding": [
+      128,
+      409,
+      898,
+      462
+    ],
+    "crop_size": [
+      770,
+      53
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "Generalized Statement of Woodward-Hoffmann Rules for Cycloadditions"
+  },
+  {
+    "id": "hotswap_051_table_caption_p1169_7",
+    "file": "hotswap_051_table_caption_p1169_7.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/eastmoney_fcc1c7940f94c7f36157a4aa9c1c804fe16e6b681ca1cef589af39c6d3e0cb90.pdf_0.jpg",
+    "page_index": 1169,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "research_report",
+      "language": "simplified_chinese",
+      "layout": "1andmore_column",
+      "special_issue": [
+        "table_fewer_line",
+        "table_horizontal"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "table_caption",
+    "anno_id": 7,
+    "order": 69,
+    "bbox_xyxy_with_padding": [
+      1063,
+      916,
+      1197,
+      973
+    ],
+    "crop_size": [
+      134,
+      57
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "交易数据"
+  },
+  {
+    "id": "hotswap_052_table_caption_p1595_box_id_12",
+    "file": "hotswap_052_table_caption_p1595_box_id_12.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/magazine_TheEconomist.2024.02.24_page_076.png",
+    "page_index": 1595,
+    "page_no": 76,
+    "page_attribute": {
+      "data_source": "magazine",
+      "language": "english",
+      "layout": "other_layout",
+      "special_issue": [
+        "table_fewer_line",
+        "table_horizontal",
+        "table_span"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "table_caption",
+    "anno_id": "box_id_12",
+    "order": 12,
+    "bbox_xyxy_with_padding": [
+      2987,
+      4081,
+      3837,
+      4176
+    ],
+    "crop_size": [
+      850,
+      95
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "The Economist commodity-price index"
+  },
+  {
+    "id": "hotswap_053_table_footnote_p0106_box_id_5",
+    "file": "hotswap_053_table_footnote_p0106_box_id_5.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/page-0b20ed47-7c6c-4578-bbdf-057a89a083ec.png",
+    "page_index": 106,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "book",
+      "language": "simplified_chinese",
+      "layout": "single_column",
+      "special_issue": [],
+      "subset": "layout_hard"
+    },
+    "category_type": "table_footnote",
+    "anno_id": "box_id_5",
+    "order": 9,
+    "bbox_xyxy_with_padding": [
+      190,
+      1320,
+      1014,
+      1411
+    ],
+    "crop_size": [
+      824,
+      91
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "注：1 $p_ { s }$为桩端穿越的中密一密实砂土、粉土的单桥静力触探比贯入阻力平均值；${ p } _ { \\mathrm { s 1} }$为砂土、粉土的下卧软土层的比贯入阻力平均值；"
+  },
+  {
+    "id": "hotswap_054_table_footnote_p0518_4",
+    "file": "hotswap_054_table_footnote_p0518_4.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/docstructbench_dianzishu_zhongwenzaixian-o.O-61569751.pdf_155.jpg",
+    "page_index": 518,
+    "page_no": 155,
+    "page_attribute": {
+      "data_source": "book",
+      "language": "simplified_chinese",
+      "layout": "single_column",
+      "special_issue": [
+        "table_fewer_line",
+        "table_horizontal"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "table_footnote",
+    "anno_id": 4,
+    "order": 8,
+    "bbox_xyxy_with_padding": [
+      138,
+      1030,
+      1348,
+      1136
+    ],
+    "crop_size": [
+      1210,
+      106
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "注：按上表依次加入各种试剂，在加入乙酸乙酯与乙酸混合液前，用混旋器混合已加入的混合液，然后边混合边加入乙酸乙酯与乙酸混合液。"
+  },
+  {
+    "id": "hotswap_055_table_footnote_p1158_8",
+    "file": "hotswap_055_table_footnote_p1158_8.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/eastmoney_dcf347592d4160dffacffdf00a9c39aa75cf9859205a7543c283d1df8bb14f90.pdf_1.jpg",
+    "page_index": 1158,
+    "page_no": 1,
+    "page_attribute": {
+      "data_source": "research_report",
+      "language": "simplified_chinese",
+      "layout": "single_column",
+      "special_issue": [
+        "table_full_line",
+        "table_horizontal",
+        "table_span"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "table_footnote",
+    "anno_id": 8,
+    "order": 11,
+    "bbox_xyxy_with_padding": [
+      106,
+      1763,
+      1551,
+      1869
+    ],
+    "crop_size": [
+      1445,
+      106
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "备注：评级标准为报告发布日后的6~12个月内公司股价（或行业指数）相对同期基准指数的相对市场表现。其中，A股市场以沪深300指数为基准：香港市场以恒生指数为基准：美股市场以标普500指数或纳斯达克综合指数为基准（另有说明的除外）。"
+  },
+  {
+    "id": "hotswap_056_table_footnote_p1595_box_id_15",
+    "file": "hotswap_056_table_footnote_p1595_box_id_15.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/magazine_TheEconomist.2024.02.24_page_076.png",
+    "page_index": 1595,
+    "page_no": 76,
+    "page_attribute": {
+      "data_source": "magazine",
+      "language": "english",
+      "layout": "other_layout",
+      "special_issue": [
+        "table_fewer_line",
+        "table_horizontal",
+        "table_span"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "table_footnote",
+    "anno_id": "box_id_15",
+    "order": 15,
+    "bbox_xyxy_with_padding": [
+      2977,
+      5374,
+      4247,
+      5554
+    ],
+    "crop_size": [
+      1270,
+      180
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "Sources: Bloomberg; CME Group; Cotlook; Refinitiv Datastream; Fastmarkets; FT; ICCO; ICO; ISO; Live Rice Index; LME; NZ Wool\nServices; Thompson Lloyd & Ewart; Urner Barry; WSJ. $^{\\star}$ Provisional."
+  },
+  {
+    "id": "hotswap_057_text_block_p0000_box_id_0",
+    "file": "hotswap_057_text_block_p0000_box_id_0.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/page-d1561665-5359-42fe-920c-d6e3bff81953.png",
+    "page_index": 0,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "book",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [],
+      "subset": "equation_hard"
+    },
+    "category_type": "text_block",
+    "anno_id": "box_id_0",
+    "order": 2,
+    "bbox_xyxy_with_padding": [
+      256,
+      307,
+      335,
+      364
+    ],
+    "crop_size": [
+      79,
+      57
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "that"
+  },
+  {
+    "id": "hotswap_058_text_block_p0062_box_id_8",
+    "file": "hotswap_058_text_block_p0062_box_id_8.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/page-7d2d833d-37b1-4c18-9ee6-4e09d352e265.png",
+    "page_index": 62,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "academic_literature",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [],
+      "subset": "equation_hard"
+    },
+    "category_type": "text_block",
+    "anno_id": "box_id_8",
+    "order": 17,
+    "bbox_xyxy_with_padding": [
+      185,
+      1517,
+      571,
+      1582
+    ],
+    "crop_size": [
+      386,
+      65
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "We know from (3.6) that"
+  },
+  {
+    "id": "hotswap_059_text_block_p0116_box_dctaptb4",
+    "file": "hotswap_059_text_block_p0116_box_dctaptb4.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/page-c7a51204-5142-4c7a-bc9d-1faf1fe1be02.png",
+    "page_index": 116,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "book",
+      "language": "simplified_chinese",
+      "layout": "single_column",
+      "special_issue": [
+        "transparent_pages"
+      ],
+      "subset": "layout_hard"
+    },
+    "category_type": "text_block",
+    "anno_id": "box-dctaptb4",
+    "order": 13,
+    "bbox_xyxy_with_padding": [
+      322,
+      1391,
+      939,
+      1456
+    ],
+    "crop_size": [
+      617,
+      65
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "37    第二节     “传播学”在中国的建构"
+  },
+  {
+    "id": "hotswap_060_text_block_p0165_box_x7lhqyqa",
+    "file": "hotswap_060_text_block_p0165_box_x7lhqyqa.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/page-df88c6e5-891e-4984-9f69-8d83891ecb67.png",
+    "page_index": 165,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "colorful_textbook",
+      "language": "en_ch_mixed",
+      "layout": "other_layout",
+      "special_issue": [],
+      "subset": "layout_hard"
+    },
+    "category_type": "text_block",
+    "anno_id": "box-x7lhqyqa",
+    "order": 10,
+    "bbox_xyxy_with_padding": [
+      1591,
+      662,
+      1894,
+      725
+    ],
+    "crop_size": [
+      303,
+      63
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "ask questions"
+  },
+  {
+    "id": "hotswap_061_text_block_p0333_box_id_2",
+    "file": "hotswap_061_text_block_p0333_box_id_2.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/yanbaopptmerge_yanbaoPPT_2460.jpg",
+    "page_index": 333,
+    "page_no": 2460,
+    "page_attribute": {
+      "data_source": "PPT2PDF",
+      "language": "simplified_chinese",
+      "layout": "other_layout",
+      "special_issue": [
+        "colorful_backgroud"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": "box_id_2",
+    "order": 2,
+    "bbox_xyxy_with_padding": [
+      207,
+      463,
+      1174,
+      563
+    ],
+    "crop_size": [
+      967,
+      100
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "- A 有两个线性无关的特征向"
+  },
+  {
+    "id": "hotswap_062_text_block_p0492_4",
+    "file": "hotswap_062_text_block_p0492_4.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/docstructbench_llm-raw-scihub-o.O-s00348-006-0169-y.pdf_2.jpg",
+    "page_index": 492,
+    "page_no": 2,
+    "page_attribute": {
+      "data_source": "academic_literature",
+      "language": "english",
+      "layout": "double_column",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": 4,
+    "order": 2,
+    "bbox_xyxy_with_padding": [
+      120,
+      396,
+      827,
+      926
+    ],
+    "crop_size": [
+      707,
+      530
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "Although the literature is replete with MBDR experiments, there are only a few experimental efforts that have been devoted to address this issue. In a channel flow experiment with relatively large bubbles and moderate variation in bubble size. it has been observed that the influence of bubble size on the effectiveness of MBDR was insignificant (Moriguchi and Kato 2002). In another flat plate test with a similar variation in bubble size, it was found that larger bubbles tend to remain closer to the solid surface, suggesting MBDR favors larger bubbles (Kawamura et al. 2004). To date, our knowledge of the influence of bubble size on MBDR is incomplete. To understand the influence of bubble size on MBDR, controlled experiments with an extensive variation in bubble size, especially one that is capable of creating very small bubbles, are needed."
+  },
+  {
+    "id": "hotswap_063_text_block_p0595_35",
+    "file": "hotswap_063_text_block_p0595_35.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/jiaocai_71434495.pdf_0.jpg",
+    "page_index": 595,
+    "page_no": 1036,
+    "page_attribute": {
+      "data_source": "exam_paper",
+      "language": "simplified_chinese",
+      "layout": "double_column",
+      "special_issue": [
+        "table_full_line",
+        "table_horizontal"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": 35,
+    "order": 44,
+    "bbox_xyxy_with_padding": [
+      1811,
+      1541,
+      2614,
+      1649
+    ],
+    "crop_size": [
+      803,
+      108
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "\\t6. 设 $ x_{n}=\\sum_{k=0}^{n} \\frac{1} {k!}, n=1, 2, \\cdots $ ，求极限 $ \\operatorname* {l i m}_{n \\to\\infty} \\left( \\frac{\\operatorname{l n} x_{n}} {\\sqrt[n]{e} -1}-n \\right). \\sqrt[n]{e} $"
+  },
+  {
+    "id": "hotswap_064_text_block_p0669_2",
+    "file": "hotswap_064_text_block_p0669_2.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/jiaocaineedrop_Evans_PDE_Solution_Chapter_6_Second-Order_Elliptic_Equations.pdf_5.jpg",
+    "page_index": 669,
+    "page_no": 1700,
+    "page_attribute": {
+      "data_source": "exam_paper",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [
+        "colorful_backgroud"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": 2,
+    "order": 11,
+    "bbox_xyxy_with_padding": [
+      166,
+      1728,
+      342,
+      1791
+    ],
+    "crop_size": [
+      176,
+      63
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "Therefore,"
+  },
+  {
+    "id": "hotswap_065_text_block_p0734_box_id_1",
+    "file": "hotswap_065_text_block_p0734_box_id_1.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/jiaocaineedrop_jiaocai_needrop_en_1761.jpg",
+    "page_index": 734,
+    "page_no": 2096,
+    "page_attribute": {
+      "data_source": "colorful_textbook",
+      "language": "simplified_chinese",
+      "layout": "single_column",
+      "special_issue": [
+        "watermark"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": "box_id_1",
+    "order": 1,
+    "bbox_xyxy_with_padding": [
+      248,
+      333,
+      1106,
+      456
+    ],
+    "crop_size": [
+      858,
+      123
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "（ 1 ）求证：数列 $ \\left\\{\\frac{a_n}{n^2}\\right\\} $是等比数列，并求出数列 $ \\{a_{n} \\} $的通项公式"
+  },
+  {
+    "id": "hotswap_066_text_block_p0791_34",
+    "file": "hotswap_066_text_block_p0791_34.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/jiaocaineedrop_jiaocai_needrop_en_2893.jpg",
+    "page_index": 791,
+    "page_no": 2317,
+    "page_attribute": {
+      "data_source": "exam_paper",
+      "language": "simplified_chinese",
+      "layout": "1andmore_column",
+      "special_issue": [
+        "colorful_backgroud"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": 34,
+    "order": 6,
+    "bbox_xyxy_with_padding": [
+      162,
+      544,
+      552,
+      633
+    ],
+    "crop_size": [
+      390,
+      89
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "A. $ \\textcircled{1} $和 $ \\textcircled{3} $ B. $ \\textcircled{1} $和 $ \\textcircled{2} $\nC. $ \\textcircled{2} $和 $ \\textcircled{4} $ D. $ \\textcircled{3} $和 $ \\textcircled{4} $"
+  },
+  {
+    "id": "hotswap_067_text_block_p0838_10",
+    "file": "hotswap_067_text_block_p0838_10.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/jiaocaineedrop_jiaocai_needrop_en_574.jpg",
+    "page_index": 838,
+    "page_no": 1869,
+    "page_attribute": {
+      "data_source": "exam_paper",
+      "language": "simplified_chinese",
+      "layout": "1andmore_column",
+      "special_issue": [
+        "table_full_line",
+        "table_horizontal"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": 10,
+    "order": 7,
+    "bbox_xyxy_with_padding": [
+      132,
+      1007,
+      672,
+      1108
+    ],
+    "crop_size": [
+      540,
+      101
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "3.根据图像判断，工作2.5小时，甲机器的耗电量是()千瓦时。"
+  },
+  {
+    "id": "hotswap_068_text_block_p0947_16",
+    "file": "hotswap_068_text_block_p0947_16.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/notes_1ba14cb325bc448f7201b20502ecf2b5_99.jpg",
+    "page_index": 947,
+    "page_no": 99,
+    "page_attribute": {
+      "data_source": "note",
+      "language": "simplified_chinese",
+      "layout": "single_column",
+      "special_issue": [],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": 16,
+    "order": 14,
+    "bbox_xyxy_with_padding": [
+      108,
+      1377,
+      1319,
+      1605
+    ],
+    "crop_size": [
+      1211,
+      228
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "\\t\\t（1）自然原因、全球变暖、蒸发旺盛；处于内陆地区，降水少；鼠害；蝗害。\n\\t\\t（2)人为原因：过度放牧；过度樵采；过度开垦；水资源的不合理利用；交通线等工程建设保护不当。"
+  },
+  {
+    "id": "hotswap_069_text_block_p0997_box_3b7qvbt4",
+    "file": "hotswap_069_text_block_p0997_box_3b7qvbt4.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/notes_f7f010b78016aeebd76e56d9283eb67f_74.jpg",
+    "page_index": 997,
+    "page_no": 74,
+    "page_attribute": {
+      "data_source": "note",
+      "language": "en_ch_mixed",
+      "layout": "single_column",
+      "special_issue": [],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": "box-3b7qvbt4",
+    "order": 25,
+    "bbox_xyxy_with_padding": [
+      120,
+      1343,
+      1041,
+      1423
+    ],
+    "crop_size": [
+      921,
+      80
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "be home to    是···所在地，栖息地"
+  },
+  {
+    "id": "hotswap_070_text_block_p1018_26",
+    "file": "hotswap_070_text_block_p1018_26.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/newspaper_0cfb8a42b5d4194d8c73dba0cdf6256c_1.jpg",
+    "page_index": 1018,
+    "page_no": 1,
+    "page_attribute": {
+      "data_source": "newspaper",
+      "language": "simplified_chinese",
+      "layout": "other_layout",
+      "special_issue": [],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": 26,
+    "order": 24,
+    "bbox_xyxy_with_padding": [
+      7,
+      3267,
+      574,
+      3922
+    ],
+    "crop_size": [
+      567,
+      655
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "从春季开始，县供销社和经纪人协会组织了87名会员和会外一批经纪人，根据季节性农产品情况组成农产品购销组，全力以赴开展农产品购销活动。3月至4月，蔬菜水果组经纪人协会会长代辰平和李尚维、冉应富牵头，组织43人的经纪人营销队伍，从曲尺、大溪、龙井等乡镇，收购豌豆、胡豆角8462吨，销往湖北宜昌金桥、沙市两河口、武汉白沙洲和江苏扬州等地，实现销售金额1850万元。6月上旬至7月中旬，从官渡、曲尺、骡坪等乡镇收购李子近3000吨，销往重庆菜园坝、成都火车北站、湖北恩施等地，均价达4970元/吨，实现销售1400万元。组织收购洋芋、蔬菜9000多吨外销，实现销售1460万元。粮油组经纪人韩官平、郭庆虎牵头，组织收购芝麻2700吨，销往河北、山东、湖南等地，实现销售金额3200余万元。畜禽组由张以珍、代辰平牵头，解决了骡坪镇大垭村刘忠培、建平乡杨柳村向崇林等农户的肉鸡销售难。目前，供销部门和经纪人协会正在组织药材等农产品外销。 唐探峰"
+  },
+  {
+    "id": "hotswap_071_text_block_p1037_6",
+    "file": "hotswap_071_text_block_p1037_6.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/newspaper_2a6b4fa088699701a6fa9ccecfb5c25d_3.jpg",
+    "page_index": 1037,
+    "page_no": 3,
+    "page_attribute": {
+      "data_source": "newspaper",
+      "language": "english",
+      "layout": "three_column",
+      "special_issue": [],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": 6,
+    "order": 4,
+    "bbox_xyxy_with_padding": [
+      112,
+      818,
+      430,
+      872
+    ],
+    "crop_size": [
+      318,
+      54
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "Previous Federal Actions"
+  },
+  {
+    "id": "hotswap_072_text_block_p1051_62",
+    "file": "hotswap_072_text_block_p1051_62.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/newspaper_4790b51e8fa793743699647c09a93ccb_1.jpg",
+    "page_index": 1051,
+    "page_no": 1,
+    "page_attribute": {
+      "data_source": "newspaper",
+      "language": "simplified_chinese",
+      "layout": "other_layout",
+      "special_issue": [],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": 62,
+    "order": 46,
+    "bbox_xyxy_with_padding": [
+      806,
+      1787,
+      1183,
+      2077
+    ],
+    "crop_size": [
+      377,
+      290
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "4分56秒91，当现场大屏幕打出蔡余庆燕夺冠成绩的时候，满场观众欢声雷动。年仅15岁的余庆燕凭借这一成锁刷新了自己今年 8月在荷兰世锦赛上创造的亚洲纪录，这块女子400米自由泳S9级金牌，也是中国在亚我运会历史上的首枚金牌。"
+  },
+  {
+    "id": "hotswap_073_text_block_p1063_1",
+    "file": "hotswap_073_text_block_p1063_1.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/newspaper_5e266dfd9c498cab274e12a7b4a75755_4.jpg",
+    "page_index": 1063,
+    "page_no": 4,
+    "page_attribute": {
+      "data_source": "newspaper",
+      "language": "english",
+      "layout": "three_column",
+      "special_issue": [],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": 1,
+    "order": 7,
+    "bbox_xyxy_with_padding": [
+      106,
+      1367,
+      600,
+      1539
+    ],
+    "crop_size": [
+      494,
+      172
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "(5) An appropriate indemnification clause protecting the United States from claims arising out of the patentee's use, occupancy, or occupations on the patented lands."
+  },
+  {
+    "id": "hotswap_074_text_block_p1075_9",
+    "file": "hotswap_074_text_block_p1075_9.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/newspaper_95f2062735b213b3d7d471a48d5ec71b_1.jpg",
+    "page_index": 1075,
+    "page_no": 1,
+    "page_attribute": {
+      "data_source": "newspaper",
+      "language": "simplified_chinese",
+      "layout": "other_layout",
+      "special_issue": [],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": 9,
+    "order": 6,
+    "bbox_xyxy_with_padding": [
+      0,
+      774,
+      455,
+      1055
+    ],
+    "crop_size": [
+      455,
+      281
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "2002年1月，李文山被确诊患上胃癌，唯一的教治方法是切除已经病变的那1/3的胃，但根据同类病例的统计，医生表示即使对李文山实施了胃部切除手术，也井不一定能控制癌细胞的扩散。王桂香表示，无论几率多小都要试一试。第二天，她将6个子女全部叫到家中，让他们商量分摊医药费的事情。"
+  },
+  {
+    "id": "hotswap_075_text_block_p1083_27",
+    "file": "hotswap_075_text_block_p1083_27.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/newspaper_b615618f3cdb0f2c13ffb5865dea799c_1.jpg",
+    "page_index": 1083,
+    "page_no": 1,
+    "page_attribute": {
+      "data_source": "newspaper",
+      "language": "simplified_chinese",
+      "layout": "other_layout",
+      "special_issue": [],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": 27,
+    "order": 32,
+    "bbox_xyxy_with_padding": [
+      2651,
+      761,
+      3282,
+      912
+    ],
+    "crop_size": [
+      631,
+      151
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "今年以来，湖北围绕“稳粮，提质，增效”，狠抓惠农政策落实，立足科技抗灾生产，着力开展优质高产创建，全力推进农业产业化经营，切实加强农产品质量安全监管，农业农村经济保持了平稳较快发展的好势头。"
+  },
+  {
+    "id": "hotswap_076_text_block_p1092_51",
+    "file": "hotswap_076_text_block_p1092_51.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/newspaper_c79c0c10a5df54b21bccad8f64063ffa_1.jpg",
+    "page_index": 1092,
+    "page_no": 1,
+    "page_attribute": {
+      "data_source": "newspaper",
+      "language": "simplified_chinese",
+      "layout": "other_layout",
+      "special_issue": [],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": 51,
+    "order": 43,
+    "bbox_xyxy_with_padding": [
+      1374,
+      3665,
+      1797,
+      3878
+    ],
+    "crop_size": [
+      423,
+      213
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "新农村建设给全市农村带来了新的气象，新的生机，农民群众生产生活水平进一步提高，使得农村基层组织凝聚力进一步增强，党群干群关系进一步融恰，农村社会风气进一步好转。"
+  },
+  {
+    "id": "hotswap_077_text_block_p1103_45",
+    "file": "hotswap_077_text_block_p1103_45.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/newspaper_e3842a5681ef54c62a58804adec06c3f_1.jpg",
+    "page_index": 1103,
+    "page_no": 1,
+    "page_attribute": {
+      "data_source": "newspaper",
+      "language": "simplified_chinese",
+      "layout": "other_layout",
+      "special_issue": [],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": 45,
+    "order": 39,
+    "bbox_xyxy_with_padding": [
+      1844,
+      1634,
+      2263,
+      1853
+    ],
+    "crop_size": [
+      419,
+      219
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "坚的主战场，各省，自治区、直辖市也可确定若干省级连片特困地区。国家继续在中西部地区确定重点县，完善调整机制。各省、自治区、直辖市可根据当地实际确定省级重点县，认定一批重点扶持的贫困村。"
+  },
+  {
+    "id": "hotswap_078_text_block_p1112_356",
+    "file": "hotswap_078_text_block_p1112_356.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/newspaper_ef5c785d9cc21ccf6b73d143f231b5c5_1.jpg",
+    "page_index": 1112,
+    "page_no": 1,
+    "page_attribute": {
+      "data_source": "newspaper",
+      "language": "simplified_chinese",
+      "layout": "other_layout",
+      "special_issue": [],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": 356,
+    "order": 329,
+    "bbox_xyxy_with_padding": [
+      1701,
+      2765,
+      2213,
+      2824
+    ],
+    "crop_size": [
+      512,
+      59
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "其次，在满足广大农村居民的融资需求上，将以信"
+  },
+  {
+    "id": "hotswap_079_text_block_p1169_70",
+    "file": "hotswap_079_text_block_p1169_70.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/eastmoney_fcc1c7940f94c7f36157a4aa9c1c804fe16e6b681ca1cef589af39c6d3e0cb90.pdf_0.jpg",
+    "page_index": 1169,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "research_report",
+      "language": "simplified_chinese",
+      "layout": "1andmore_column",
+      "special_issue": [
+        "table_fewer_line",
+        "table_horizontal"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": 70,
+    "order": 48,
+    "bbox_xyxy_with_padding": [
+      149,
+      1773,
+      1048,
+      2091
+    ],
+    "crop_size": [
+      899,
+      318
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "-  公司财务指标稳定，财务费用占比大幅下降。公司收入规模增长及工程款\n回收情况较好推动经营活动产生的现金流量净额增长 38.97% ，鉴于公司\n22H1该数据因个别项目结算进度延迟而出现 72.2%的下滑，全年数据的有\n效改善反映公司应收账款周转率的提高及较强的回款能力。公司投资活动\n现金流量净额增长 125.3%主因Lonshi铜矿建设支出及矿服项目设备投入\n所致。此外，公司报告期内销售费用的明显变动与境外业务的加力拓展有\n关（销售费用 +33.9% ，占主营收入比例 0.49% (2021同期占比 0.35%）；\n财务费用受美元兑人民币汇率上升而大幅下降 78.4% （以美元结算项目资\n金计提汇兑损益），财务费用占比由21年的 2.34%降至 0.425% （22全年"
+  },
+  {
+    "id": "hotswap_080_text_block_p1308_2",
+    "file": "hotswap_080_text_block_p1308_2.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/PPT_ch7_page_030.png",
+    "page_index": 1308,
+    "page_no": 30,
+    "page_attribute": {
+      "data_source": "PPT2PDF",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": 2,
+    "order": 1,
+    "bbox_xyxy_with_padding": [
+      104,
+      265,
+      1924,
+      610
+    ],
+    "crop_size": [
+      1820,
+      345
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "If all the diagonal entries of a diagonal matrix $\\mathbf S$ are equal, say, $c$, we call $\\mathbf S$ a scalar matrix because multiplication of any square matrix $\\mathbf A$ of the same size by $\\mathbf S$ has the same effect as the multiplication by a scalar, that is,"
+  },
+  {
+    "id": "hotswap_081_text_block_p1371_29",
+    "file": "hotswap_081_text_block_p1371_29.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/newspaper_Chicago Tribune_0801@magazinesclubnew_page_032.png",
+    "page_index": 1371,
+    "page_no": 32,
+    "page_attribute": {
+      "data_source": "newspaper",
+      "language": "english",
+      "layout": "other_layout",
+      "special_issue": [
+        "table_full_line",
+        "table_horizontal",
+        "table_with_img"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": 29,
+    "order": 37,
+    "bbox_xyxy_with_padding": [
+      1306,
+      1032,
+      1710,
+      1140
+    ],
+    "crop_size": [
+      404,
+      108
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "The early returns of the NBA\nAll-Star fan voting do not look\ngood for the Chicago Bulls."
+  },
+  {
+    "id": "hotswap_082_text_block_p1386_21",
+    "file": "hotswap_082_text_block_p1386_21.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/newspaper_TheGuardianUS-2025-1-8@magazinesclubnew_page_041.png",
+    "page_index": 1386,
+    "page_no": 41,
+    "page_attribute": {
+      "data_source": "newspaper",
+      "language": "english",
+      "layout": "other_layout",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": 21,
+    "order": 22,
+    "bbox_xyxy_with_padding": [
+      3450,
+      2576,
+      4503,
+      3016
+    ],
+    "crop_size": [
+      1053,
+      440
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "eight, AKA Gotta Light?, which particularly pushes the boundaries of Lynchian cinematography with a sonically\nand visually audacious sequence showing the birth of Bob."
+  },
+  {
+    "id": "hotswap_083_text_block_p1400_9",
+    "file": "hotswap_083_text_block_p1400_9.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/newspaper_TheBostonGlobe-2025-1-8@magazinesclubnew_page_003.png",
+    "page_index": 1400,
+    "page_no": 3,
+    "page_attribute": {
+      "data_source": "newspaper",
+      "language": "english",
+      "layout": "other_layout",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": 9,
+    "order": 10,
+    "bbox_xyxy_with_padding": [
+      21,
+      2190,
+      399,
+      2426
+    ],
+    "crop_size": [
+      378,
+      236
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "Several aftershocks were felt in the area, including in Nepal. The quake had a magnitude of 7.1, according to the US Geological Survey, though it was measured as 6.8 by the China Earthquake Networks Center."
+  },
+  {
+    "id": "hotswap_084_text_block_p1444_16",
+    "file": "hotswap_084_text_block_p1444_16.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/book_en_国外数学教材-数论-Melvyn B. Nathanson—Elementary Methods in Number Theory_0092.png",
+    "page_index": 1444,
+    "page_no": 92,
+    "page_attribute": {
+      "data_source": "book",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": 16,
+    "order": 16,
+    "bbox_xyxy_with_padding": [
+      197,
+      1132,
+      1094,
+      1646
+    ],
+    "crop_size": [
+      897,
+      514
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "1. Consider the secret key cryptosystem constructed from the prime\n$p = 947$ and the encoding key $e = 167$. Encipher the plaintext $P = 2$.\nFind a decrypting key and decipher the ciphertext $C = 3$.\n2. Consider the primes $p = 53$ and $q = 61$. Let $m = pq$. Prove that $e = 7$ is relatively prime to $\\varphi(m)$. Find a positive integer $d$ such that $ed \\equiv 1 \\pmod{\\varphi(m)}$.\n3. The integer 6059 is the product of two distinct primes, and $\\varphi(6059) = 5904$. Use Theorem 2.19 to compute the prime divisors of 6059.\n4. The probability that an integer chosen at random between 1 and $n$ is relatively prime to $n$ is $\\varphi(n)/n$. Let $n=pq$, where $p$ and $q$ are distinct primes greater than $x$. Prove that the probability that a randomly chosen positive integer up to $x$ is relatively prime to $n$ is greater than\n$(1-1/x)^2$. If $x=200$, this probability is greater than 0.99."
+  },
+  {
+    "id": "hotswap_085_text_block_p1524_4",
+    "file": "hotswap_085_text_block_p1524_4.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/exam_paper_en-file-putnam-archive_2007_Problems_2007_page_001.png",
+    "page_index": 1524,
+    "page_no": 1,
+    "page_attribute": {
+      "data_source": "exam_paper",
+      "language": "english",
+      "layout": "1andmore_column",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": 4,
+    "order": 5,
+    "bbox_xyxy_with_padding": [
+      146,
+      552,
+      846,
+      800
+    ],
+    "crop_size": [
+      700,
+      248
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "A-3  Let $k$ be a positive integer. Suppose that the integers $1 , 2 , 3 , \\ldots , 3 k + 1$ are written down in random order. What is the probability that at no time during this process, the sum of the integers that have been written up to that time is a positive integer divisible by 3? Your answer should be in closed form, but may include factorials."
+  },
+  {
+    "id": "hotswap_086_text_block_p1558_16",
+    "file": "hotswap_086_text_block_p1558_16.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/exam_paper_en-file-putnam-archive_2008_Solutions_2008s_page_004.png",
+    "page_index": 1558,
+    "page_no": 4,
+    "page_attribute": {
+      "data_source": "exam_paper",
+      "language": "english",
+      "layout": "double_column",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": 16,
+    "order": 16,
+    "bbox_xyxy_with_padding": [
+      936,
+      364,
+      1260,
+      420
+    ],
+    "crop_size": [
+      324,
+      56
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "If $r$ is the radius of $C$, then"
+  },
+  {
+    "id": "hotswap_087_text_block_p1589_11",
+    "file": "hotswap_087_text_block_p1589_11.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/magazine_TheEconomist.2023.11.25_page_006.png",
+    "page_index": 1589,
+    "page_no": 6,
+    "page_attribute": {
+      "data_source": "magazine",
+      "language": "english",
+      "layout": "other_layout",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": 11,
+    "order": 8,
+    "bbox_xyxy_with_padding": [
+      266,
+      5629,
+      3108,
+      5961
+    ],
+    "crop_size": [
+      2842,
+      332
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "More than 30 sensors including LiDAR, and a computing system allows the robotaxi to detect $360^{\\circ}$ and make optimal decisions. Hyundai is beginning production of the IONIQ 5 robotaxi, which is set to launch in Las Vegas during the first half of 2024."
+  },
+  {
+    "id": "hotswap_088_text_block_p1650_5",
+    "file": "hotswap_088_text_block_p1650_5.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/PPT_PresentationSpecification_page_025.png",
+    "page_index": 1650,
+    "page_no": 25,
+    "page_attribute": {
+      "data_source": "PPT2PDF",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "text_block",
+    "anno_id": 5,
+    "order": 3,
+    "bbox_xyxy_with_padding": [
+      188,
+      881,
+      1911,
+      1340
+    ],
+    "crop_size": [
+      1723,
+      459
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "• During tutorials;\n-  Each group should attend $>=  66\\%$ tutorials;\n- Each group should present and lead a discussion session;\n- Each student shall participate in Q&A;"
+  },
+  {
+    "id": "hotswap_089_title_p0003_box_id_0",
+    "file": "hotswap_089_title_p0003_box_id_0.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/page-14cd673f-d86d-45a7-a13e-2b4e1d91c08f.png",
+    "page_index": 3,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "note",
+      "language": "simplified_chinese",
+      "layout": "single_column",
+      "special_issue": [
+        "handwriting"
+      ],
+      "subset": "equation_hard"
+    },
+    "category_type": "title",
+    "anno_id": "box_id_0",
+    "order": 3,
+    "bbox_xyxy_with_padding": [
+      179,
+      188,
+      717,
+      256
+    ],
+    "crop_size": [
+      538,
+      68
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "2．自然数 ---整数的子集（非负子集）"
+  },
+  {
+    "id": "hotswap_090_title_p0258_box_id_2",
+    "file": "hotswap_090_title_p0258_box_id_2.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/page-fd04ea51-677c-4de2-8e8e-adfd791e2957.png",
+    "page_index": 258,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "academic_literature",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [],
+      "subset": "table_hard"
+    },
+    "category_type": "title",
+    "anno_id": "box_id_2",
+    "order": 4,
+    "bbox_xyxy_with_padding": [
+      138,
+      523,
+      536,
+      578
+    ],
+    "crop_size": [
+      398,
+      55
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "# Underwriting Income Property"
+  },
+  {
+    "id": "hotswap_091_title_p0607_8",
+    "file": "hotswap_091_title_p0607_8.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/docstructbench_00039896.1983.10545823.pdf_1.jpg",
+    "page_index": 607,
+    "page_no": 0,
+    "page_attribute": {
+      "data_source": "magazine",
+      "language": "english",
+      "layout": "other_layout",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "title",
+    "anno_id": 8,
+    "order": 4,
+    "bbox_xyxy_with_padding": [
+      459,
+      471,
+      1663,
+      656
+    ],
+    "crop_size": [
+      1204,
+      185
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "Dose-Response Relationship between Tobacco Consumption and Melanin Pigmentation in the Attached Gingiva"
+  },
+  {
+    "id": "hotswap_092_title_p0765_8",
+    "file": "hotswap_092_title_p0765_8.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/jiaocaineedrop_jiaocai_needrop_en_2374.jpg",
+    "page_index": 765,
+    "page_no": 2213,
+    "page_attribute": {
+      "data_source": "exam_paper",
+      "language": "en_ch_mixed",
+      "layout": "other_layout",
+      "special_issue": [
+        "watermark"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "title",
+    "anno_id": 8,
+    "order": 41,
+    "bbox_xyxy_with_padding": [
+      5914,
+      1960,
+      6479,
+      2123
+    ],
+    "crop_size": [
+      565,
+      163
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "听力材料"
+  },
+  {
+    "id": "hotswap_093_title_p0891_3",
+    "file": "hotswap_093_title_p0891_3.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/yanbaor2_yanbaoPPT_3604.jpg",
+    "page_index": 891,
+    "page_no": 3604,
+    "page_attribute": {
+      "data_source": "magazine",
+      "language": "simplified_chinese",
+      "layout": "double_column",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "title",
+    "anno_id": 3,
+    "order": 12,
+    "bbox_xyxy_with_padding": [
+      324,
+      1562,
+      972,
+      1623
+    ],
+    "crop_size": [
+      648,
+      61
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "338与数字创新者合作：瑞信主席访谈录"
+  },
+  {
+    "id": "hotswap_094_title_p1025_38",
+    "file": "hotswap_094_title_p1025_38.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/newspaper_2a645bfcbcd473423581cd9f1ceb778e_1.jpg",
+    "page_index": 1025,
+    "page_no": 1,
+    "page_attribute": {
+      "data_source": "newspaper",
+      "language": "simplified_chinese",
+      "layout": "other_layout",
+      "special_issue": [],
+      "subset": "v1.5"
+    },
+    "category_type": "title",
+    "anno_id": 38,
+    "order": 16,
+    "bbox_xyxy_with_padding": [
+      765,
+      253,
+      1822,
+      440
+    ],
+    "crop_size": [
+      1057,
+      187
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "全国渔业工作会议提出——加快推进现代渔业建设"
+  },
+  {
+    "id": "hotswap_095_title_p1072_31",
+    "file": "hotswap_095_title_p1072_31.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/newspaper_7d8b25729455f1d061a95ec4269d72dc_1.jpg",
+    "page_index": 1072,
+    "page_no": 1,
+    "page_attribute": {
+      "data_source": "newspaper",
+      "language": "english",
+      "layout": "three_column",
+      "special_issue": [],
+      "subset": "v1.5"
+    },
+    "category_type": "title",
+    "anno_id": 31,
+    "order": 33,
+    "bbox_xyxy_with_padding": [
+      603,
+      913,
+      1090,
+      1024
+    ],
+    "crop_size": [
+      487,
+      111
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "National Institute of Diabetes and Digestive and Kidney Diseases; Notice of Closed Meeting"
+  },
+  {
+    "id": "hotswap_096_title_p1096_24",
+    "file": "hotswap_096_title_p1096_24.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/newspaper_d1716a12000a38e1e4c0bf66309558db_1.jpg",
+    "page_index": 1096,
+    "page_no": 1,
+    "page_attribute": {
+      "data_source": "newspaper",
+      "language": "simplified_chinese",
+      "layout": "other_layout",
+      "special_issue": [],
+      "subset": "v1.5"
+    },
+    "category_type": "title",
+    "anno_id": 24,
+    "order": 50,
+    "bbox_xyxy_with_padding": [
+      97,
+      2402,
+      2038,
+      2546
+    ],
+    "crop_size": [
+      1941,
+      144
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "强农惠农政策力度不断加大稳粮增收创新实践扎实推进"
+  },
+  {
+    "id": "hotswap_097_title_p1191_14",
+    "file": "hotswap_097_title_p1191_14.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/yanbaopptmerge_b96c77724a4dcf5e1c535d2d4e8f77b26255cf5c4561d37e11fcff640a74919a.pdf_7.jpg",
+    "page_index": 1191,
+    "page_no": 7,
+    "page_attribute": {
+      "data_source": "research_report",
+      "language": "simplified_chinese",
+      "layout": "single_column",
+      "special_issue": [
+        "table_fewer_line",
+        "table_horizontal"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "title",
+    "anno_id": 14,
+    "order": 14,
+    "bbox_xyxy_with_padding": [
+      107,
+      1424,
+      263,
+      1481
+    ],
+    "crop_size": [
+      156,
+      57
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "联系我们"
+  },
+  {
+    "id": "hotswap_098_title_p1372_23",
+    "file": "hotswap_098_title_p1372_23.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/newspaper_The Times UK_0801@magazinesclubnew_page_083.png",
+    "page_index": 1372,
+    "page_no": 83,
+    "page_attribute": {
+      "data_source": "newspaper",
+      "language": "english",
+      "layout": "other_layout",
+      "special_issue": [
+        "colorful_backgroud"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "title",
+    "anno_id": 23,
+    "order": 1,
+    "bbox_xyxy_with_padding": [
+      606,
+      147,
+      1189,
+      203
+    ],
+    "crop_size": [
+      583,
+      56
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "New lower prices on selected departures"
+  },
+  {
+    "id": "hotswap_099_title_p1473_1",
+    "file": "hotswap_099_title_p1473_1.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/book_en_搬书匠-3473-Reactive Programming with RxJS-2015-英文版_page_003.png",
+    "page_index": 1473,
+    "page_no": 3,
+    "page_attribute": {
+      "data_source": "book",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "title",
+    "anno_id": 1,
+    "order": 1,
+    "bbox_xyxy_with_padding": [
+      445,
+      366,
+      1132,
+      430
+    ],
+    "crop_size": [
+      687,
+      64
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "Early praise for Reactive Programming with RxJS"
+  },
+  {
+    "id": "hotswap_100_title_p1650_1",
+    "file": "hotswap_100_title_p1650_1.png",
+    "source_image": "remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench/images/PPT_PresentationSpecification_page_025.png",
+    "page_index": 1650,
+    "page_no": 25,
+    "page_attribute": {
+      "data_source": "PPT2PDF",
+      "language": "english",
+      "layout": "single_column",
+      "special_issue": [
+        "None"
+      ],
+      "subset": "v1.5"
+    },
+    "category_type": "title",
+    "anno_id": 1,
+    "order": 1,
+    "bbox_xyxy_with_padding": [
+      202,
+      162,
+      1395,
+      288
+    ],
+    "crop_size": [
+      1193,
+      126
+    ],
+    "suggested_prompt": "OCR:",
+    "ground_truth_source": "text",
+    "ground_truth": "HOW TO PARTICIPATE?"
+  }
+]

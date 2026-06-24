@@ -1,0 +1,38 @@
+{
+  "count": 100,
+  "category_counts": {
+    "code_txt": 2,
+    "equation_isolated": 14,
+    "figure_caption": 8,
+    "footer": 4,
+    "header": 5,
+    "page_footnote": 2,
+    "reference": 2,
+    "table": 10,
+    "table_caption": 5,
+    "table_footnote": 4,
+    "text_block": 32,
+    "title": 12
+  },
+  "prompt_counts": {
+    "OCR:": 76,
+    "Formula Recognition:": 14,
+    "Table Recognition:": 10
+  },
+  "dataset_dir": "/Users/lukaivanic/projects/work/aoe_research/remote_artifacts/aos_research_remote_shutdown_20260531/glm_ocr_portable_bundle/data/OmniDocBench",
+  "pad": 12,
+  "quotas": {
+    "text_block": 32,
+    "title": 12,
+    "equation_isolated": 14,
+    "table": 10,
+    "figure_caption": 8,
+    "table_caption": 5,
+    "header": 5,
+    "footer": 4,
+    "table_footnote": 4,
+    "page_footnote": 2,
+    "reference": 2,
+    "code_txt": 2
+  }
+}
