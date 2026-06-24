@@ -9,6 +9,7 @@ local_modeling_mineru.py and does not import Transformers.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import math
 import re
@@ -164,6 +165,36 @@ def clean_json(value: Any) -> Any:
         except Exception:
             pass
     return value
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def model_file_record(path: Path, *, hash_contents: bool) -> dict[str, Any]:
+    record: dict[str, Any] = {
+        "name": path.name,
+        "size_bytes": int(path.stat().st_size),
+    }
+    if hash_contents:
+        record["sha256"] = sha256_file(path)
+    return record
+
+
+def collect_model_identity(model_dir: Path, *, hash_model_files: bool = False) -> dict[str, Any]:
+    config_path = model_dir / "config.json"
+    safetensors_paths = sorted(model_dir.glob("*.safetensors"))
+    return {
+        "model_dir": str(model_dir),
+        "snapshot_revision": model_dir.name,
+        "config_json": None if not config_path.exists() else model_file_record(config_path, hash_contents=True),
+        "safetensors": [model_file_record(path, hash_contents=hash_model_files) for path in safetensors_paths],
+        "safetensors_sha256_computed": bool(hash_model_files),
+    }
 
 
 def get_rgb_image(image: Image.Image) -> Image.Image:
@@ -500,6 +531,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--benchmark-decode", action="store_true", help="Run a separate warmed decode-only tok/s benchmark for each generation call.")
     parser.add_argument("--decode-warmup-steps", type=int, default=8)
     parser.add_argument("--decode-measure-steps", type=int, default=64)
+    parser.add_argument("--hash-model-files", action="store_true", help="Compute sha256 for safetensors files for model-version audit. This may add startup wall time.")
     parser.add_argument("--output", type=Path, default=None)
     parser.add_argument("--save-selected-crop", type=Path, default=None)
     return parser.parse_args()
@@ -512,6 +544,7 @@ def main() -> None:
     image_path = args.image.expanduser().resolve()
     if not image_path.exists():
         raise FileNotFoundError(f"image not found: {image_path}")
+    model_identity = collect_model_identity(model_dir, hash_model_files=bool(args.hash_model_files))
 
     if args.device is not None and str(args.device).startswith("npu"):
         import torch
@@ -566,6 +599,7 @@ def main() -> None:
         "experiment": "02_local_mineru_model_two_step_extract",
         "scope": "Manual local MinerU two-step protocol with local torch model implementation; AutoProcessor remains external.",
         "model": str(model_dir),
+        "model_identity": model_identity,
         "processor": str(processor_dir),
         "image": str(image_path),
         "image_size": [int(rgb_image.width), int(rgb_image.height)],

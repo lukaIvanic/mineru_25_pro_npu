@@ -76,6 +76,14 @@ it is expected to look like:
 export MODEL_DIR=/workspace/hf_cache/hub/models--opendatalab--MinerU2.5-Pro-2605-1.2B/snapshots/bff20d4ae2bf202df9f45284b4d43681555a97ed
 ```
 
+Expected Vast model identity:
+
+```text
+snapshot_revision: bff20d4ae2bf202df9f45284b4d43681555a97ed
+config.json: size 2840, sha256 22097df08750242647a513043636a8dff16820a09757e9271e220bdea378df28
+model.safetensors: size 2312126640, sha256 abf8681ca63b8dec7b67de257af47b821f179442f72998d0696ae2ed9232a5f0
+```
+
 Then run:
 
 ```sh
@@ -127,12 +135,14 @@ python 02_local_eager_recognition/run_local_model_two_step_extract.py \
   --benchmark-decode \
   --decode-warmup-steps 8 \
   --decode-measure-steps 64 \
+  --hash-model-files \
   --output outputs/local_model_crop_01_npu.json
 ```
 
 Expected: stdout shows `jit_compile=False` and the Conv3D patch line, then the
 JSON result. `recognition.text` should be the English BA matrix paragraph.
-Report both layout and recognition `decode_benchmark.decode_tok_s`.
+Report `model_identity` and both layout and recognition
+`decode_benchmark.decode_tok_s`.
 
 For the first NPU report, include:
 
@@ -140,6 +150,7 @@ For the first NPU report, include:
 - `MODEL_DIR` path
 - whether stdout shows `jit_compile=False`
 - whether stdout shows the Conv3D patch line
+- model_identity, including config and safetensors sha256
 - layout raw text
 - parsed block list
 - recognition text
