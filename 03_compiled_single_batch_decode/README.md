@@ -49,6 +49,18 @@ TorchAir cache key: mineru_manual_attention_bs1_cache{cache_length}
 compiled callable: explicit 24 K tensors + explicit 24 V tensors, no *args
 ```
 
+Decoder parameter count for this local MinerU2.5-Pro config:
+
+```text
+embedding / tied LM head params: 136,134,656
+non-embedding decoder params:   357,898,112
+total language-decoder params:  494,032,768
+```
+
+The embedding count is `151936 vocab * 896 hidden`. The non-embedding count is
+24 decoder layers plus final RMSNorm; `lm_head.weight` is tied to
+`embed_tokens.weight` and is not counted a second time.
+
 The flat decode module is created per `(batch_size, cache_length)` and stores
 `cache_length` as a Python attribute. The decode loops update `cache_position`
 in-place with `add_(1)`. This is intentionally stricter than the earlier
@@ -170,6 +182,50 @@ recognition.validation
 recognition.canonical_reference
 recognition.decode_benchmark
 ```
+
+## Work/NPU Decode Profiler Command
+
+Use this after the smoke passes and there are no recompile warnings. The
+profiled window is after compile warmup and after an additional decode warmup;
+it captures only fixed-step compiled recognition decode calls, not prefill,
+layout, validation, or compile. Keep `--profile-decode-steps` below 16.
+
+```sh
+python 03_compiled_single_batch_decode/run_local_model_two_step_extract.py \
+  --model "$MODEL_DIR" \
+  --device npu:0 \
+  --dtype float16 \
+  --npu-jit-compile off \
+  --npu-conv3d-mode auto \
+  --no-use-fast \
+  --image crops/crop_01_text_block_en.png \
+  --max-new-tokens 128 \
+  --cache-length 512 \
+  --benchmark-decode \
+  --decode-warmup-steps 4 \
+  --decode-measure-steps 32 \
+  --profile-decode-dir outputs/exp03_decode_profiles \
+  --profile-decode-warmup-steps 4 \
+  --profile-decode-steps 8 \
+  --profile-decode-metric pipe \
+  --hash-model-files \
+  --output outputs/exp03_crop_01_npu_profile.json
+```
+
+Expected profile fields:
+
+```text
+recognition.decode_profile.enabled=true
+recognition.decode_profile.scope=compiled_static_recognition_decode_torch_npu_profiler
+recognition.decode_profile.profiled_decode_steps=8
+recognition.decode_profile.with_stack=true
+recognition.decode_profile.record_shapes=true
+recognition.decode_profile.profile_dir=<created profile run directory>
+```
+
+Report `recognition.decode_profile`, `recognition.decode_benchmark`, and whether
+the profile directory contains an `ASCEND_PROFILER_OUTPUT` directory. Do not
+write helper scripts for this run.
 
 ## CUDA/Vast Smoke Command
 

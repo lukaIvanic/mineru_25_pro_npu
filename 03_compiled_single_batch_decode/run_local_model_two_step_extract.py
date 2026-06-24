@@ -14,7 +14,9 @@ import importlib
 import json
 import math
 import re
+import shutil
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Callable, Optional
 
@@ -77,6 +79,7 @@ BLOCK_TYPES = {
 }
 NPU_JIT_COMPILE_CHOICES = ("off", "on", "default")
 NPU_CONV3D_MODE_CHOICES = ("auto", "inference_patch", "never")
+PROFILE_METRIC_CHOICES = ("pipe", "memory", "l2", "memory_access")
 DEFAULT_TORCHAIR_CACHE_DIR = Path("outputs") / "torchair_cache"
 CANONICAL_CROP_01_RECOGNITION_TEXT = (
     "When an attempt is made to form the product BA, we discover that the dimensions are not compatible in this order "
@@ -315,6 +318,30 @@ def compile_static_decode(
         "cache_length": int(cache_length),
         "decode_attention": "manual_eager_attention_ops",
     }
+
+
+def npu_profiler_config(metric: str):
+    import torch_npu.profiler as npu_prof
+
+    metrics = {
+        "pipe": npu_prof.AiCMetrics.PipeUtilization,
+        "memory": npu_prof.AiCMetrics.Memory,
+        "l2": npu_prof.AiCMetrics.L2Cache,
+        "memory_access": npu_prof.AiCMetrics.MemoryAccess,
+    }
+    if metric not in metrics:
+        raise ValueError(f"unsupported profile metric {metric!r}; expected one of {sorted(metrics)}")
+    return npu_prof._ExperimentalConfig(
+        profiler_level=npu_prof.ProfilerLevel.Level1,
+        aic_metrics=metrics[metric],
+        l2_cache=metric == "l2",
+        export_type=npu_prof.ExportType.Text,
+    )
+
+
+def make_decode_profile_run_dir(root: Path, *, steps: int, metric: str) -> Path:
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%S%fZ")
+    return root.expanduser().resolve() / f"mineru_exp03_decode_{timestamp}_torchair_manual_{metric}_{int(steps)}steps"
 
 
 def clean_json(value: Any) -> Any:
@@ -782,6 +809,134 @@ class CompiledSingleBatchRecognitionDecoder:
             "compile": dict(compile_meta),
         }
 
+    @torch.inference_mode()
+    def profile_decode(
+        self,
+        input_ids: Any,
+        attention_mask: Any,
+        pixel_values: Any,
+        image_grid_thw: Any,
+        *,
+        profile_dir: Path,
+        warmup_steps: int,
+        profile_steps: int,
+        metric: str,
+    ) -> dict[str, Any]:
+        device = torch.device(self.model.device)
+        if device.type != "npu":
+            raise ValueError("--profile-decode-dir requires --device npu:0; torch_npu profiler is NPU-only.")
+        if int(input_ids.shape[0]) != 1:
+            raise ValueError(f"compiled single-batch decode expects batch size 1, got {int(input_ids.shape[0])}")
+        profile_steps = int(profile_steps)
+        warmup_steps = max(0, int(warmup_steps))
+        if profile_steps <= 0:
+            raise ValueError("--profile-decode-steps must be positive.")
+        if profile_steps >= 16:
+            raise ValueError("--profile-decode-steps must be <16 to keep torch_npu profiler output bounded.")
+
+        import torch_npu.profiler as npu_prof
+
+        cache_length = self.resolve_cache_length(input_ids, max(profile_steps + 1, warmup_steps + 1))
+        self.require_cache_capacity(input_ids, cache_length, max(profile_steps, warmup_steps))
+        compile_warmup_meta = self.ensure_compiled_decode_warm(
+            input_ids,
+            attention_mask,
+            pixel_values,
+            image_grid_thw,
+            cache_length=cache_length,
+        )
+        compiled_decode, compile_meta = self.compiled_decode_for(batch_size=1, cache_length=cache_length)
+
+        def make_profile_prefill_state():
+            prefill = self.model.forward_static_prefill(
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                pixel_values=pixel_values,
+                image_grid_thw=image_grid_thw,
+                cache_length=cache_length,
+                logits_to_keep=1,
+            )
+            next_token = torch.argmax(prefill.logits[:, -1, :].float(), dim=-1, keepdim=True)
+            cache_position = prefill.next_cache_position.clone()
+            flat_cache = prefill.cache.flat_tensors()
+            return prefill, next_token, cache_position, flat_cache
+
+        def run_decode_steps(next_token: Any, cache_position: Any, rope_deltas: Any, flat_cache: tuple[Any, ...], steps: int):
+            generated = [next_token]
+            for _step in range(int(steps)):
+                logits = compiled_decode(next_token, cache_position, rope_deltas, *flat_cache)
+                next_token = torch.argmax(logits[:, -1, :].float(), dim=-1, keepdim=True)
+                generated.append(next_token)
+                cache_position.add_(1)
+            return torch.cat(generated, dim=1)
+
+        warm_prefill, warm_next, warm_cache_position, warm_flat_cache = make_profile_prefill_state()
+        maybe_sync_device(device)
+        warm_start = time.perf_counter()
+        _ = run_decode_steps(
+            warm_next,
+            warm_cache_position,
+            warm_prefill.rope_deltas,
+            warm_flat_cache,
+            warmup_steps,
+        )
+        maybe_sync_device(device)
+        profile_warmup_s = time.perf_counter() - warm_start
+
+        prof_prefill, prof_next, prof_cache_position, prof_flat_cache = make_profile_prefill_state()
+        run_dir = make_decode_profile_run_dir(profile_dir, steps=profile_steps, metric=metric)
+        shutil.rmtree(run_dir, ignore_errors=True)
+        run_dir.mkdir(parents=True, exist_ok=True)
+        schedule = npu_prof.schedule(wait=0, warmup=0, active=1, repeat=1)
+        maybe_sync_device(device)
+        profile_start = time.perf_counter()
+        with npu_prof.profile(
+            activities=[npu_prof.ProfilerActivity.CPU, npu_prof.ProfilerActivity.NPU],
+            schedule=schedule,
+            experimental_config=npu_profiler_config(metric),
+            on_trace_ready=npu_prof.tensorboard_trace_handler(str(run_dir), analyse_flag=True),
+            record_shapes=True,
+            profile_memory=False,
+            with_stack=True,
+        ) as profiler:
+            with torch.profiler.record_function("mineru.exp03.compiled_recognition_decode_profile"):
+                profiled_ids = run_decode_steps(
+                    prof_next,
+                    prof_cache_position,
+                    prof_prefill.rope_deltas,
+                    prof_flat_cache,
+                    profile_steps,
+                )
+            maybe_sync_device(device)
+            profiler.step()
+        maybe_sync_device(device)
+        profile_wall_s = time.perf_counter() - profile_start
+
+        generated_ids = [int(token_id) for token_id in profiled_ids[0].detach().cpu().tolist()]
+        summary = {
+            "enabled": True,
+            "scope": "compiled_static_recognition_decode_torch_npu_profiler",
+            "profile_dir": str(run_dir),
+            "metric": str(metric),
+            "with_stack": True,
+            "record_shapes": True,
+            "profile_memory": False,
+            "profile_warmup_decode_steps": int(warmup_steps),
+            "profiled_decode_steps": int(profile_steps),
+            "profile_warmup_s": float(profile_warmup_s),
+            "profile_wall_s": float(profile_wall_s),
+            "cache_length": int(cache_length),
+            "compile_warmup": compile_warmup_meta,
+            "compile": dict(compile_meta),
+            "generated_token_count": int(len(generated_ids)),
+            "generated_token_ids": generated_ids,
+        }
+        (run_dir / "decode_profile_summary.json").write_text(
+            json.dumps(clean_json(summary), indent=2, ensure_ascii=False),
+            encoding="utf-8",
+        )
+        return summary
+
 
 class LocalMinerUModelPredictor:
     def __init__(
@@ -794,6 +949,10 @@ class LocalMinerUModelPredictor:
         benchmark_decode: bool = False,
         decode_warmup_steps: int = 8,
         decode_measure_steps: int = 64,
+        profile_decode_dir: Path | None = None,
+        profile_decode_steps: int = 8,
+        profile_decode_warmup_steps: int = 4,
+        profile_decode_metric: str = "pipe",
     ):
         self.model = model
         self.processor = processor
@@ -802,6 +961,10 @@ class LocalMinerUModelPredictor:
         self.benchmark_decode = bool(benchmark_decode)
         self.decode_warmup_steps = int(decode_warmup_steps)
         self.decode_measure_steps = int(decode_measure_steps)
+        self.profile_decode_dir = profile_decode_dir
+        self.profile_decode_steps = int(profile_decode_steps)
+        self.profile_decode_warmup_steps = int(profile_decode_warmup_steps)
+        self.profile_decode_metric = str(profile_decode_metric)
         skip_token_ids: set[int] = set()
         for owner in (model.config, model.config.text_config, processor.tokenizer):
             for field in ("bos_token_id", "eos_token_id", "pad_token_id"):
@@ -895,6 +1058,19 @@ class LocalMinerUModelPredictor:
                     pad_token_id=pad_token_id,
                 )
 
+        decode_profile: dict[str, Any] = {"enabled": False}
+        if use_compiled_recognition_decode and self.profile_decode_dir is not None:
+            decode_profile = self.compiled_decode.profile_decode(
+                input_ids=inputs.input_ids,
+                attention_mask=inputs.attention_mask,
+                pixel_values=getattr(inputs, "pixel_values", None),
+                image_grid_thw=getattr(inputs, "image_grid_thw", None),
+                profile_dir=self.profile_decode_dir,
+                warmup_steps=self.profile_decode_warmup_steps,
+                profile_steps=self.profile_decode_steps,
+                metric=self.profile_decode_metric,
+            )
+
         validation: dict[str, Any] = {"enabled": False}
         if use_compiled_recognition_decode:
             with torch.inference_mode():
@@ -955,6 +1131,7 @@ class LocalMinerUModelPredictor:
             "compiled_decode": compiled_decode_meta,
             "validation": validation,
             "decode_benchmark": decode_benchmark,
+            "decode_profile": decode_profile,
         }
 
 
@@ -989,6 +1166,7 @@ class LocalMinerUTwoStepClient:
             "compiled_decode": prediction["compiled_decode"],
             "validation": prediction["validation"],
             "decode_benchmark": prediction["decode_benchmark"],
+            "decode_profile": prediction["decode_profile"],
         }
 
     def prepare_selected_block(
@@ -1030,6 +1208,7 @@ class LocalMinerUTwoStepClient:
             "compiled_decode": prediction["compiled_decode"],
             "validation": prediction["validation"],
             "decode_benchmark": prediction["decode_benchmark"],
+            "decode_profile": prediction["decode_profile"],
         }
 
     def two_step_extract(self, image: Image.Image, *, block_index: int = 0) -> dict[str, Any]:
@@ -1095,6 +1274,10 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--benchmark-decode", action="store_true", help="Run a separate warmed decode-only tok/s benchmark for each generation call.")
     parser.add_argument("--decode-warmup-steps", type=int, default=8)
     parser.add_argument("--decode-measure-steps", type=int, default=64)
+    parser.add_argument("--profile-decode-dir", type=Path, default=None, help="Write one post-warmup torch_npu profiler capture for compiled recognition decode.")
+    parser.add_argument("--profile-decode-steps", type=int, default=8, help="Number of compiled decode steps inside the profiler window; must be <16.")
+    parser.add_argument("--profile-decode-warmup-steps", type=int, default=4, help="Compiled decode warmup steps before opening the profiler.")
+    parser.add_argument("--profile-decode-metric", default="pipe", choices=PROFILE_METRIC_CHOICES)
     parser.add_argument("--hash-model-files", action="store_true", help="Compute sha256 for safetensors files for model-version audit. This may add startup wall time.")
     parser.add_argument("--output", type=Path, default=None)
     parser.add_argument("--save-selected-crop", type=Path, default=None)
@@ -1146,6 +1329,10 @@ def main() -> None:
         benchmark_decode=bool(args.benchmark_decode),
         decode_warmup_steps=int(args.decode_warmup_steps),
         decode_measure_steps=int(args.decode_measure_steps),
+        profile_decode_dir=args.profile_decode_dir,
+        profile_decode_steps=int(args.profile_decode_steps),
+        profile_decode_warmup_steps=int(args.profile_decode_warmup_steps),
+        profile_decode_metric=str(args.profile_decode_metric),
     )
     client = LocalMinerUTwoStepClient(
         predictor,
@@ -1203,6 +1390,14 @@ def main() -> None:
             "decode_measure_steps": int(args.decode_measure_steps),
             "scope": "decode-only forward calls after prefill; prefill_s is reported separately and excluded from decode_tok_s",
         },
+        "decode_profile_config": {
+            "enabled": args.profile_decode_dir is not None,
+            "profile_decode_dir": None if args.profile_decode_dir is None else str(args.profile_decode_dir),
+            "profile_decode_warmup_steps": int(args.profile_decode_warmup_steps),
+            "profile_decode_steps": int(args.profile_decode_steps),
+            "profile_decode_metric": str(args.profile_decode_metric),
+            "scope": "torch_npu profiler capture around fixed-step compiled recognition decode after compile and decode warmup",
+        },
         "layout": {
             "prompt": layout["prompt"],
             "raw_text": layout["raw_text"],
@@ -1216,6 +1411,7 @@ def main() -> None:
             "compiled_decode": layout["compiled_decode"],
             "validation": layout["validation"],
             "decode_benchmark": layout["decode_benchmark"],
+            "decode_profile": layout["decode_profile"],
         },
         "recognition": {
             "selected_block": recognition["selected_block"],
@@ -1232,6 +1428,7 @@ def main() -> None:
             "validation": recognition["validation"],
             "canonical_reference": canonical_reference,
             "decode_benchmark": recognition["decode_benchmark"],
+            "decode_profile": recognition["decode_profile"],
         },
     }
 
