@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import time
 
 import torch
 import torch.nn.functional as F
@@ -677,6 +678,150 @@ class LocalMinerU2_5ForConditionalGeneration(nn.Module):
             rope_deltas=rope_deltas if rope_deltas is not None else self.rope_deltas,
         )
 
+    def _sync_device(self) -> None:
+        if self.device.type == "cuda":
+            torch.cuda.synchronize(self.device)
+        elif self.device.type == "npu":
+            import torch_npu
+
+            torch_npu.npu.synchronize()
+
+    def _prefill_generation_state(
+        self,
+        input_ids: torch.Tensor,
+        attention_mask: torch.Tensor,
+        pixel_values: torch.Tensor | None,
+        image_grid_thw: torch.Tensor | None,
+        *,
+        eos_token_id: int,
+    ) -> tuple[
+        list[tuple[torch.Tensor, torch.Tensor]],
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+    ]:
+        outputs = self.forward(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            pixel_values=pixel_values,
+            image_grid_thw=image_grid_thw,
+            use_cache=True,
+            logits_to_keep=1,
+        )
+        next_token = torch.argmax(outputs.logits[:, -1, :].float(), dim=-1, keepdim=True)
+        finished = next_token.squeeze(1) == eos_token_id
+        current_attention_mask = torch.cat([attention_mask, torch.ones_like(next_token)], dim=1)
+        return outputs.past_key_values, outputs.rope_deltas, next_token, current_attention_mask, finished
+
+    def _decode_generation_step(
+        self,
+        next_token: torch.Tensor,
+        attention_mask: torch.Tensor,
+        past_key_values: list[tuple[torch.Tensor, torch.Tensor]],
+        rope_deltas: torch.Tensor,
+        finished: torch.Tensor,
+        *,
+        eos_token_id: int,
+        pad_token_id: int,
+    ) -> tuple[
+        list[tuple[torch.Tensor, torch.Tensor]],
+        torch.Tensor,
+        torch.Tensor,
+        torch.Tensor,
+    ]:
+        outputs = self.forward(
+            input_ids=next_token,
+            attention_mask=attention_mask,
+            pixel_values=None,
+            image_grid_thw=None,
+            past_key_values=past_key_values,
+            use_cache=True,
+            rope_deltas=rope_deltas,
+            logits_to_keep=1,
+        )
+        new_next_token = torch.argmax(outputs.logits[:, -1, :].float(), dim=-1, keepdim=True)
+        new_next_token = torch.where(finished.view(-1, 1), torch.full_like(new_next_token, pad_token_id), new_next_token)
+        new_finished = finished | (new_next_token.squeeze(1) == eos_token_id)
+        new_attention_mask = torch.cat([attention_mask, torch.ones_like(new_next_token)], dim=1)
+        return outputs.past_key_values, new_next_token, new_attention_mask, new_finished
+
+    @torch.inference_mode()
+    def benchmark_decode(
+        self,
+        input_ids: torch.Tensor,
+        attention_mask: torch.Tensor,
+        pixel_values: torch.Tensor | None,
+        image_grid_thw: torch.Tensor | None,
+        *,
+        warmup_steps: int = 8,
+        measure_steps: int = 64,
+        eos_token_id: int | None = None,
+        pad_token_id: int | None = None,
+    ) -> dict[str, float | int | bool]:
+        eos_token_id = int(self.config.eos_token_id if eos_token_id is None else eos_token_id)
+        pad_token_id = int(self.config.pad_token_id if pad_token_id is None else pad_token_id)
+        warmup_steps = max(0, int(warmup_steps))
+        measure_steps = max(0, int(measure_steps))
+
+        if warmup_steps > 0:
+            warm_past, warm_rope_deltas, warm_next, warm_attention_mask, warm_finished = self._prefill_generation_state(
+                input_ids,
+                attention_mask,
+                pixel_values,
+                image_grid_thw,
+                eos_token_id=eos_token_id,
+            )
+            for _ in range(warmup_steps):
+                warm_past, warm_next, warm_attention_mask, warm_finished = self._decode_generation_step(
+                    warm_next,
+                    warm_attention_mask,
+                    warm_past,
+                    warm_rope_deltas,
+                    warm_finished,
+                    eos_token_id=eos_token_id,
+                    pad_token_id=pad_token_id,
+                )
+            self._sync_device()
+
+        self._sync_device()
+        prefill_start = time.perf_counter()
+        past, rope_deltas, next_token, current_attention_mask, finished = self._prefill_generation_state(
+            input_ids,
+            attention_mask,
+            pixel_values,
+            image_grid_thw,
+            eos_token_id=eos_token_id,
+        )
+        self._sync_device()
+        prefill_s = time.perf_counter() - prefill_start
+
+        self._sync_device()
+        decode_start = time.perf_counter()
+        for _ in range(measure_steps):
+            past, next_token, current_attention_mask, finished = self._decode_generation_step(
+                next_token,
+                current_attention_mask,
+                past,
+                rope_deltas,
+                finished,
+                eos_token_id=eos_token_id,
+                pad_token_id=pad_token_id,
+            )
+        self._sync_device()
+        decode_s = time.perf_counter() - decode_start
+
+        return {
+            "enabled": True,
+            "warmup_decode_steps": int(warmup_steps),
+            "measured_decode_steps": int(measure_steps),
+            "prefill_s": float(prefill_s),
+            "decode_s": float(decode_s),
+            "decode_tok_s": float(measure_steps / decode_s) if decode_s > 0 else 0.0,
+            "raw_decode_forward_calls": int(measure_steps),
+            "stop_on_eos": False,
+        }
+
     @torch.inference_mode()
     def generate_ids(
         self,
@@ -691,37 +836,25 @@ class LocalMinerU2_5ForConditionalGeneration(nn.Module):
     ) -> torch.Tensor:
         eos_token_id = int(self.config.eos_token_id if eos_token_id is None else eos_token_id)
         pad_token_id = int(self.config.pad_token_id if pad_token_id is None else pad_token_id)
-        outputs = self.forward(
-            input_ids=input_ids,
-            attention_mask=attention_mask,
-            pixel_values=pixel_values,
-            image_grid_thw=image_grid_thw,
-            use_cache=True,
-            logits_to_keep=1,
+        past, rope_deltas, next_token, current_attention_mask, finished = self._prefill_generation_state(
+            input_ids,
+            attention_mask,
+            pixel_values,
+            image_grid_thw,
+            eos_token_id=eos_token_id,
         )
-        past = outputs.past_key_values
-        rope_deltas = outputs.rope_deltas
-        next_token = torch.argmax(outputs.logits[:, -1, :].float(), dim=-1, keepdim=True)
         generated = [next_token]
-        finished = next_token.squeeze(1) == eos_token_id
-        current_attention_mask = torch.cat([attention_mask, torch.ones_like(next_token)], dim=1)
         for _ in range(max(0, int(max_new_tokens) - 1)):
             if bool(finished.all().item()):
                 break
-            outputs = self.forward(
-                input_ids=next_token,
-                attention_mask=current_attention_mask,
-                pixel_values=None,
-                image_grid_thw=None,
-                past_key_values=past,
-                use_cache=True,
-                rope_deltas=rope_deltas,
-                logits_to_keep=1,
+            past, next_token, current_attention_mask, finished = self._decode_generation_step(
+                next_token,
+                current_attention_mask,
+                past,
+                rope_deltas,
+                finished,
+                eos_token_id=eos_token_id,
+                pad_token_id=pad_token_id,
             )
-            past = outputs.past_key_values
-            next_token = torch.argmax(outputs.logits[:, -1, :].float(), dim=-1, keepdim=True)
-            next_token = torch.where(finished.view(-1, 1), torch.full_like(next_token, pad_token_id), next_token)
             generated.append(next_token)
-            finished |= next_token.squeeze(1) == eos_token_id
-            current_attention_mask = torch.cat([current_attention_mask, torch.ones_like(next_token)], dim=1)
         return torch.cat(generated, dim=1)

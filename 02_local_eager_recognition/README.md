@@ -91,6 +91,25 @@ python 02_local_eager_recognition/run_local_model_two_step_extract.py \
 Expected: one parsed text block and the English BA matrix paragraph for
 `recognition.text`.
 
+Add decode-only timing:
+
+```sh
+python 02_local_eager_recognition/run_local_model_two_step_extract.py \
+  --model "$MODEL_DIR" \
+  --device cuda:0 \
+  --dtype float16 \
+  --no-use-fast \
+  --image crops/crop_01_text_block_en.png \
+  --benchmark-decode \
+  --decode-warmup-steps 8 \
+  --decode-measure-steps 64 \
+  --output outputs/local_model_crop_01_cuda_decode_bench.json
+```
+
+This adds `layout.decode_benchmark` and `recognition.decode_benchmark` to the
+JSON. `decode_tok_s` counts only cached decode forward calls after prefill;
+`prefill_s` is reported separately and excluded from `decode_tok_s`.
+
 ## Work/NPU Smoke Command
 
 Set `MODEL_DIR` to the local MinerU2.5-Pro snapshot directory on the NPU box,
@@ -105,11 +124,15 @@ python 02_local_eager_recognition/run_local_model_two_step_extract.py \
   --npu-conv3d-mode auto \
   --no-use-fast \
   --image crops/crop_01_text_block_en.png \
+  --benchmark-decode \
+  --decode-warmup-steps 8 \
+  --decode-measure-steps 64 \
   --output outputs/local_model_crop_01_npu.json
 ```
 
 Expected: stdout shows `jit_compile=False` and the Conv3D patch line, then the
 JSON result. `recognition.text` should be the English BA matrix paragraph.
+Report both layout and recognition `decode_benchmark.decode_tok_s`.
 
 For the first NPU report, include:
 
@@ -120,6 +143,7 @@ For the first NPU report, include:
 - layout raw text
 - parsed block list
 - recognition text
+- layout and recognition decode_benchmark blocks
 - timing_s
 - output JSON path
 - exact error text if it fails

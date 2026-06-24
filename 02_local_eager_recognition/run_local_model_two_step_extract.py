@@ -257,10 +257,22 @@ def select_prompt(block_type: str) -> str:
 
 
 class LocalMinerUModelPredictor:
-    def __init__(self, model: LocalMinerU2_5ForConditionalGeneration, processor: Any, *, max_new_tokens: int):
+    def __init__(
+        self,
+        model: LocalMinerU2_5ForConditionalGeneration,
+        processor: Any,
+        *,
+        max_new_tokens: int,
+        benchmark_decode: bool = False,
+        decode_warmup_steps: int = 8,
+        decode_measure_steps: int = 64,
+    ):
         self.model = model
         self.processor = processor
         self.max_new_tokens = int(max_new_tokens)
+        self.benchmark_decode = bool(benchmark_decode)
+        self.decode_warmup_steps = int(decode_warmup_steps)
+        self.decode_measure_steps = int(decode_measure_steps)
         skip_token_ids: set[int] = set()
         for owner in (model.config, model.config.text_config, processor.tokenizer):
             for field in ("bos_token_id", "eos_token_id", "pad_token_id"):
@@ -317,6 +329,18 @@ class LocalMinerUModelPredictor:
                 pad_token_id=getattr(self.processor.tokenizer, "pad_token_id", self.model.config.pad_token_id),
             )
         generate_s = time.perf_counter() - start
+        decode_benchmark: dict[str, Any] = {"enabled": False}
+        if self.benchmark_decode:
+            decode_benchmark = self.model.benchmark_decode(
+                input_ids=inputs.input_ids,
+                attention_mask=inputs.attention_mask,
+                pixel_values=getattr(inputs, "pixel_values", None),
+                image_grid_thw=getattr(inputs, "image_grid_thw", None),
+                warmup_steps=self.decode_warmup_steps,
+                measure_steps=self.decode_measure_steps,
+                eos_token_id=getattr(self.processor.tokenizer, "eos_token_id", self.model.config.eos_token_id),
+                pad_token_id=getattr(self.processor.tokenizer, "pad_token_id", self.model.config.pad_token_id),
+            )
 
         generated_ids = generated_tensor.cpu().tolist()[0]
         filtered_ids = [token_id for token_id in generated_ids if token_id not in self.skip_token_ids]
@@ -341,6 +365,7 @@ class LocalMinerUModelPredictor:
                 "use_cache": True,
                 "max_new_tokens": self.max_new_tokens,
             },
+            "decode_benchmark": decode_benchmark,
         }
 
 
@@ -372,6 +397,7 @@ class LocalMinerUTwoStepClient:
             "generated_token_ids": prediction["generated_token_ids"],
             "filtered_token_ids": prediction["filtered_token_ids"],
             "generate_s": prediction["generate_s"],
+            "decode_benchmark": prediction["decode_benchmark"],
         }
 
     def prepare_selected_block(
@@ -410,6 +436,7 @@ class LocalMinerUTwoStepClient:
             "filtered_token_ids": prediction["filtered_token_ids"],
             "text": prediction["text"],
             "generate_s": prediction["generate_s"],
+            "decode_benchmark": prediction["decode_benchmark"],
         }
 
     def two_step_extract(self, image: Image.Image, *, block_index: int = 0) -> dict[str, Any]:
@@ -470,6 +497,9 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--layout-image-size", type=int, nargs=2, default=(1036, 1036), metavar=("W", "H"))
     parser.add_argument("--block-index", type=int, default=0)
     parser.add_argument("--max-new-tokens", type=int, default=512)
+    parser.add_argument("--benchmark-decode", action="store_true", help="Run a separate warmed decode-only tok/s benchmark for each generation call.")
+    parser.add_argument("--decode-warmup-steps", type=int, default=8)
+    parser.add_argument("--decode-measure-steps", type=int, default=64)
     parser.add_argument("--output", type=Path, default=None)
     parser.add_argument("--save-selected-crop", type=Path, default=None)
     return parser.parse_args()
@@ -505,7 +535,14 @@ def main() -> None:
         use_fast=bool(args.use_fast),
         local_files_only=True,
     )
-    predictor = LocalMinerUModelPredictor(model, processor, max_new_tokens=args.max_new_tokens)
+    predictor = LocalMinerUModelPredictor(
+        model,
+        processor,
+        max_new_tokens=args.max_new_tokens,
+        benchmark_decode=bool(args.benchmark_decode),
+        decode_warmup_steps=int(args.decode_warmup_steps),
+        decode_measure_steps=int(args.decode_measure_steps),
+    )
     client = LocalMinerUTwoStepClient(
         predictor,
         layout_image_size=(int(args.layout_image_size[0]), int(args.layout_image_size[1])),
@@ -546,6 +583,12 @@ def main() -> None:
             "layout_generate_s": float(layout["generate_s"]),
             "recognition_generate_s": float(recognition["generate_s"]),
         },
+        "decode_benchmark_config": {
+            "enabled": bool(args.benchmark_decode),
+            "decode_warmup_steps": int(args.decode_warmup_steps),
+            "decode_measure_steps": int(args.decode_measure_steps),
+            "scope": "decode-only forward calls after prefill; prefill_s is reported separately and excluded from decode_tok_s",
+        },
         "layout": {
             "prompt": layout["prompt"],
             "raw_text": layout["raw_text"],
@@ -556,6 +599,7 @@ def main() -> None:
             "filtered_token_count": layout["filtered_token_count"],
             "generated_token_ids": layout["generated_token_ids"],
             "filtered_token_ids": layout["filtered_token_ids"],
+            "decode_benchmark": layout["decode_benchmark"],
         },
         "recognition": {
             "selected_block": recognition["selected_block"],
@@ -568,6 +612,7 @@ def main() -> None:
             "generated_token_ids": recognition["generated_token_ids"],
             "filtered_token_ids": recognition["filtered_token_ids"],
             "text": recognition["text"],
+            "decode_benchmark": recognition["decode_benchmark"],
         },
     }
 
