@@ -290,6 +290,7 @@ def compile_static_decode(
             dynamic=False,
             cache_dir=str(shape_cache_dir),
             ge_cache=True,
+            fullgraph=True,
         )
         return compiled_decode, {
             "backend": "torchair",
@@ -518,6 +519,7 @@ class CompiledSingleBatchRecognitionDecoder:
         self.cache_length = None if cache_length is None else int(cache_length)
         self.flat_decode = model.make_flat_static_decode_module().eval()
         self._compiled_by_shape: dict[tuple[int, int], tuple[Callable[..., Any], dict[str, Any]]] = {}
+        self._warmup_by_shape: dict[tuple[int, int], dict[str, Any]] = {}
 
     def resolve_cache_length(self, input_ids: Any, max_new_tokens: int) -> int:
         return int(self.cache_length or (int(input_ids.shape[1]) + int(max_new_tokens)))
@@ -544,6 +546,65 @@ class CompiledSingleBatchRecognitionDecoder:
             self._compiled_by_shape[key] = (compiled_decode, compile_meta)
         return self._compiled_by_shape[key]
 
+    def ensure_compiled_decode_warm(
+        self,
+        input_ids: Any,
+        attention_mask: Any,
+        pixel_values: Any,
+        image_grid_thw: Any,
+        *,
+        cache_length: int,
+    ) -> dict[str, Any]:
+        import torch
+
+        key = (int(input_ids.shape[0]), int(cache_length))
+        if key in self._warmup_by_shape:
+            previous = dict(self._warmup_by_shape[key])
+            previous["ran_this_call"] = False
+            return previous
+
+        compile_wrapper_start = time.perf_counter()
+        compiled_decode, compile_meta = self.compiled_decode_for(
+            batch_size=int(input_ids.shape[0]),
+            cache_length=int(cache_length),
+        )
+        maybe_sync_device(self.model.device)
+        compile_wrapper_s = time.perf_counter() - compile_wrapper_start
+
+        maybe_sync_device(self.model.device)
+        prefill_start = time.perf_counter()
+        warm_prefill = self.model.forward_static_prefill(
+            input_ids=input_ids,
+            attention_mask=attention_mask,
+            pixel_values=pixel_values,
+            image_grid_thw=image_grid_thw,
+            cache_length=int(cache_length),
+            logits_to_keep=1,
+        )
+        maybe_sync_device(self.model.device)
+        prefill_s = time.perf_counter() - prefill_start
+
+        warm_next = torch.argmax(warm_prefill.logits[:, -1, :].float(), dim=-1, keepdim=True)
+        flat_cache = warm_prefill.cache.flat_tensors()
+        maybe_sync_device(self.model.device)
+        first_call_start = time.perf_counter()
+        _ = compiled_decode(warm_next, warm_prefill.next_cache_position, warm_prefill.rope_deltas, *flat_cache)
+        maybe_sync_device(self.model.device)
+        first_call_s = time.perf_counter() - first_call_start
+
+        warmup_meta = {
+            "ran": True,
+            "ran_this_call": True,
+            "batch_size": int(input_ids.shape[0]),
+            "cache_length": int(cache_length),
+            "compile_wrapper_s": float(compile_wrapper_s),
+            "prefill_s": float(prefill_s),
+            "first_call_s": float(first_call_s),
+            "compile": dict(compile_meta),
+        }
+        self._warmup_by_shape[key] = dict(warmup_meta)
+        return warmup_meta
+
     def generate(
         self,
         input_ids: Any,
@@ -561,10 +622,14 @@ class CompiledSingleBatchRecognitionDecoder:
             raise ValueError(f"compiled single-batch decode expects batch size 1, got {int(input_ids.shape[0])}")
         cache_length = self.resolve_cache_length(input_ids, max_new_tokens)
         self.require_cache_capacity(input_ids, cache_length, int(max_new_tokens))
-        compile_start = time.perf_counter()
+        compile_warmup_meta = self.ensure_compiled_decode_warm(
+            input_ids,
+            attention_mask,
+            pixel_values,
+            image_grid_thw,
+            cache_length=cache_length,
+        )
         compiled_decode, compile_meta = self.compiled_decode_for(batch_size=1, cache_length=cache_length)
-        maybe_sync_device(self.model.device)
-        compile_wrapper_s = time.perf_counter() - compile_start
 
         maybe_sync_device(self.model.device)
         prefill_start = time.perf_counter()
@@ -585,21 +650,13 @@ class CompiledSingleBatchRecognitionDecoder:
         cache_position = prefill.next_cache_position
         flat_cache = prefill.cache.flat_tensors()
         decode_calls = 0
-        compiled_first_call_s = None
 
         maybe_sync_device(self.model.device)
         decode_start = time.perf_counter()
         for _step in range(max(0, int(max_new_tokens) - 1)):
             if bool(finished.all().item()):
                 break
-            if decode_calls == 0:
-                maybe_sync_device(self.model.device)
-                first_start = time.perf_counter()
-                logits = compiled_decode(next_token, cache_position, prefill.rope_deltas, *flat_cache)
-                maybe_sync_device(self.model.device)
-                compiled_first_call_s = time.perf_counter() - first_start
-            else:
-                logits = compiled_decode(next_token, cache_position, prefill.rope_deltas, *flat_cache)
+            logits = compiled_decode(next_token, cache_position, prefill.rope_deltas, *flat_cache)
             decode_calls += 1
             next_token = torch.argmax(logits[:, -1, :].float(), dim=-1, keepdim=True)
             next_token = torch.where(
@@ -619,8 +676,9 @@ class CompiledSingleBatchRecognitionDecoder:
             "scope": "recognition_decode_only",
             "cache_length": int(cache_length),
             "cache_position_start": int(prefill.next_cache_position[0].detach().cpu().item()),
-            "compile_wrapper_s": float(compile_wrapper_s),
-            "compiled_first_call_s": None if compiled_first_call_s is None else float(compiled_first_call_s),
+            "compile_warmup": compile_warmup_meta,
+            "compile_wrapper_s": float(compile_warmup_meta.get("compile_wrapper_s", 0.0)),
+            "compiled_first_call_s": float(compile_warmup_meta.get("first_call_s", 0.0)),
             "prefill_s": float(prefill_s),
             "decode_s": float(decode_s),
             "decode_calls": int(decode_calls),
@@ -651,6 +709,13 @@ class CompiledSingleBatchRecognitionDecoder:
         warmup_steps = max(0, int(warmup_steps))
         cache_length = self.resolve_cache_length(input_ids, max(measure_steps + 1, warmup_steps + 1))
         self.require_cache_capacity(input_ids, cache_length, max(measure_steps, warmup_steps))
+        compile_warmup_meta = self.ensure_compiled_decode_warm(
+            input_ids,
+            attention_mask,
+            pixel_values,
+            image_grid_thw,
+            cache_length=cache_length,
+        )
         compiled_decode, compile_meta = self.compiled_decode_for(batch_size=1, cache_length=cache_length)
 
         warm_prefill = self.model.forward_static_prefill(
@@ -664,14 +729,8 @@ class CompiledSingleBatchRecognitionDecoder:
         warm_next = torch.argmax(warm_prefill.logits[:, -1, :].float(), dim=-1, keepdim=True)
         warm_cache_position = warm_prefill.next_cache_position
         warm_flat_cache = warm_prefill.cache.flat_tensors()
-        compile_first_call_s = None
         for step in range(warmup_steps):
-            maybe_sync_device(self.model.device)
-            start = time.perf_counter()
             logits = compiled_decode(warm_next, warm_cache_position, warm_prefill.rope_deltas, *warm_flat_cache)
-            maybe_sync_device(self.model.device)
-            if step == 0:
-                compile_first_call_s = time.perf_counter() - start
             warm_next = torch.argmax(logits[:, -1, :].float(), dim=-1, keepdim=True)
             warm_cache_position = warm_cache_position + 1
 
@@ -705,7 +764,10 @@ class CompiledSingleBatchRecognitionDecoder:
             "scope": "compiled_static_recognition_decode_only",
             "warmup_decode_steps": int(warmup_steps),
             "measured_decode_steps": int(measure_steps),
-            "compile_first_call_s": None if compile_first_call_s is None else float(compile_first_call_s),
+            "compile_warmup": compile_warmup_meta,
+            "compile_first_call_s": None
+            if not compile_warmup_meta.get("ran_this_call", False)
+            else float(compile_warmup_meta.get("first_call_s", 0.0)),
             "prefill_s": float(prefill_s),
             "decode_s": float(decode_s),
             "decode_tok_s": float(measure_steps / decode_s) if decode_s > 0 else 0.0,

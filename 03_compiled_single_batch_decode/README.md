@@ -85,6 +85,9 @@ Expected:
 - stdout shows the Conv3D patch line
 - `recognition.compiled_decode.enabled=true`
 - `recognition.compiled_decode.compile.backend=torchair`
+- `recognition.compiled_decode.compile.fullgraph=true`
+- `recognition.compiled_decode.compile_warmup.ran_this_call=true` on the first
+  cold process run for this shape
 - `recognition.validation.trimmed_token_match=true`
 - `recognition.canonical_reference.strict_match=true`
 - `recognition.text` exactly equals:
@@ -94,6 +97,10 @@ When an attempt is made to form the product BA, we discover that the dimensions 
 ```
 
 - `recognition.decode_benchmark.scope=compiled_static_recognition_decode_only`
+- `recognition.decode_benchmark.compile_warmup.ran_this_call=false` when it runs
+  after recognition generation in the same process. If this is `true`, the
+  benchmark paid a second compile and the decode compile cache contract is
+  broken.
 - warm cache reruns should have much smaller `compiled_first_call_s` than the
   first cold compile run
 
