@@ -77,6 +77,78 @@ BLOCK_TYPES = {
 NPU_JIT_COMPILE_CHOICES = ("off", "on", "default")
 NPU_CONV3D_MODE_CHOICES = ("auto", "inference_patch", "never")
 DEFAULT_TORCHAIR_CACHE_DIR = Path("outputs") / "torchair_cache"
+CANONICAL_CROP_01_RECOGNITION_TEXT = (
+    "When an attempt is made to form the product BA, we discover that the dimensions are not compatible in this order "
+    "because the rows of B are three-dimensional vectors and the columns of A are two-dimensional vectors. Hence the "
+    "dot product of the jth row of B and the kth column of A is not defined."
+)
+CANONICAL_CROP_01_RECOGNITION_GENERATED_IDS = [
+    4498,
+    458,
+    4774,
+    374,
+    1865,
+    311,
+    1352,
+    279,
+    1985,
+    33489,
+    11,
+    582,
+    6997,
+    429,
+    279,
+    15336,
+    525,
+    537,
+    18146,
+    304,
+    419,
+    1973,
+    1576,
+    279,
+    6978,
+    315,
+    425,
+    525,
+    2326,
+    32420,
+    22879,
+    323,
+    279,
+    8147,
+    315,
+    362,
+    525,
+    1378,
+    32420,
+    22879,
+    13,
+    31040,
+    279,
+    12756,
+    1985,
+    315,
+    279,
+    502,
+    339,
+    2802,
+    315,
+    425,
+    323,
+    279,
+    595,
+    339,
+    3250,
+    315,
+    362,
+    374,
+    537,
+    4512,
+    13,
+    151645,
+]
+CANONICAL_CROP_01_RECOGNITION_FILTERED_IDS = CANONICAL_CROP_01_RECOGNITION_GENERATED_IDS[:-1]
 
 
 def _normalize_3d_param(value: Any) -> list[int]:
@@ -384,6 +456,53 @@ def trim_ids_at_eos(token_ids: list[int], eos_token_id: int) -> list[int]:
     except ValueError:
         return token_ids
     return token_ids[: eos_index + 1]
+
+
+def first_mismatch_index(left: list[Any], right: list[Any]) -> int | None:
+    for idx, (left_value, right_value) in enumerate(zip(left, right)):
+        if left_value != right_value:
+            return int(idx)
+    if len(left) != len(right):
+        return int(min(len(left), len(right)))
+    return None
+
+
+def canonical_crop_01_reference_validation(image_path: Path, recognition: dict[str, Any]) -> dict[str, Any]:
+    if image_path.name != "crop_01_text_block_en.png":
+        return {
+            "enabled": False,
+            "reason": "canonical reference is defined only for crops/crop_01_text_block_en.png",
+        }
+
+    generated_ids = [int(value) for value in recognition.get("generated_token_ids", [])]
+    filtered_ids = [int(value) for value in recognition.get("filtered_token_ids", [])]
+    text = str(recognition.get("text", ""))
+    generated_match = generated_ids == CANONICAL_CROP_01_RECOGNITION_GENERATED_IDS
+    filtered_match = filtered_ids == CANONICAL_CROP_01_RECOGNITION_FILTERED_IDS
+    text_match = text == CANONICAL_CROP_01_RECOGNITION_TEXT
+    return {
+        "enabled": True,
+        "reference_source": "experiment_02_local_eager_cuda_outputs/local_model_crop_01_cuda.json",
+        "reference_model_revision": "bff20d4ae2bf202df9f45284b4d43681555a97ed",
+        "strict_match": bool(generated_match and filtered_match and text_match),
+        "generated_ids_match": bool(generated_match),
+        "filtered_ids_match": bool(filtered_match),
+        "text_match": bool(text_match),
+        "first_generated_id_mismatch_index": first_mismatch_index(
+            generated_ids,
+            CANONICAL_CROP_01_RECOGNITION_GENERATED_IDS,
+        ),
+        "first_filtered_id_mismatch_index": first_mismatch_index(
+            filtered_ids,
+            CANONICAL_CROP_01_RECOGNITION_FILTERED_IDS,
+        ),
+        "actual_generated_token_count": int(len(generated_ids)),
+        "expected_generated_token_count": int(len(CANONICAL_CROP_01_RECOGNITION_GENERATED_IDS)),
+        "actual_filtered_token_count": int(len(filtered_ids)),
+        "expected_filtered_token_count": int(len(CANONICAL_CROP_01_RECOGNITION_FILTERED_IDS)),
+        "actual_text": text,
+        "expected_text": CANONICAL_CROP_01_RECOGNITION_TEXT,
+    }
 
 
 class CompiledSingleBatchRecognitionDecoder:
@@ -981,6 +1100,7 @@ def main() -> None:
 
     layout = result["layout"]
     recognition = result["recognition"]
+    canonical_reference = canonical_crop_01_reference_validation(image_path, recognition)
     payload = {
         "experiment": "03_compiled_single_batch_decode",
         "scope": "Manual local MinerU two-step protocol; layout stays dynamic eager, recognition uses static-cache compiled single-batch decode.",
@@ -1044,6 +1164,7 @@ def main() -> None:
             "text": recognition["text"],
             "compiled_decode": recognition["compiled_decode"],
             "validation": recognition["validation"],
+            "canonical_reference": canonical_reference,
             "decode_benchmark": recognition["decode_benchmark"],
         },
     }

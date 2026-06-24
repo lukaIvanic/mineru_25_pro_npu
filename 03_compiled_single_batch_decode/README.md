@@ -86,7 +86,13 @@ Expected:
 - `recognition.compiled_decode.enabled=true`
 - `recognition.compiled_decode.compile.backend=torchair`
 - `recognition.validation.trimmed_token_match=true`
-- `recognition.text` is the English BA matrix paragraph
+- `recognition.canonical_reference.strict_match=true`
+- `recognition.text` exactly equals:
+
+```text
+When an attempt is made to form the product BA, we discover that the dimensions are not compatible in this order because the rows of B are three-dimensional vectors and the columns of A are two-dimensional vectors. Hence the dot product of the jth row of B and the kth column of A is not defined.
+```
+
 - `recognition.decode_benchmark.scope=compiled_static_recognition_decode_only`
 - warm cache reruns should have much smaller `compiled_first_call_s` than the
   first cold compile run
@@ -105,6 +111,7 @@ layout.decode_benchmark
 recognition.text
 recognition.compiled_decode
 recognition.validation
+recognition.canonical_reference
 recognition.decode_benchmark
 ```
 
