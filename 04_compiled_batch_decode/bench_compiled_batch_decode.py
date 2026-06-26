@@ -20,8 +20,11 @@ from PIL import Image
 import torch
 
 from local_modeling_mineru import (
+    DECODE_ROTARY_IMPL_CHOICES,
+    DECODE_ROTARY_IMPL_MANUAL,
     DECODE_WEIGHT_FORMAT_CHOICES,
     LocalMinerU2_5ForConditionalGeneration,
+    configure_decode_rotary_impl,
     configure_decode_weight_format,
 )
 from run_local_model_two_step_extract import (
@@ -303,6 +306,23 @@ def run_single_static_reference(
     return generated
 
 
+def set_decode_rotary_impl_for_validation(
+    model: LocalMinerU2_5ForConditionalGeneration,
+    mode: str,
+) -> list[tuple[Any, str]]:
+    previous: list[tuple[Any, str]] = []
+    for module in model.modules():
+        if hasattr(module, "decode_rotary_impl"):
+            previous.append((module, str(module.decode_rotary_impl)))
+            module.decode_rotary_impl = str(mode)
+    return previous
+
+
+def restore_decode_rotary_impl(previous: list[tuple[Any, str]]) -> None:
+    for module, mode in previous:
+        module.decode_rotary_impl = mode
+
+
 def first_mismatch(left: list[int], right: list[int]) -> int | None:
     for idx, (left_id, right_id) in enumerate(zip(left, right)):
         if int(left_id) != int(right_id):
@@ -331,10 +351,14 @@ def validate_batched_decode(
         collect_tokens=True,
     )
     maybe_sync_device(model.device)
-    references = [
-        run_single_static_reference(model, prepared, cache_length=cache_length, steps=int(steps))
-        for prepared in prepared_crops
-    ]
+    previous_rotary = set_decode_rotary_impl_for_validation(model, DECODE_ROTARY_IMPL_MANUAL)
+    try:
+        references = [
+            run_single_static_reference(model, prepared, cache_length=cache_length, steps=int(steps))
+            for prepared in prepared_crops
+        ]
+    finally:
+        restore_decode_rotary_impl(previous_rotary)
     per_item = []
     for idx, (batched, reference) in enumerate(zip(batched_tokens or [], references)):
         mismatch = first_mismatch(batched, reference)
@@ -350,7 +374,7 @@ def validate_batched_decode(
         )
     return {
         "enabled": True,
-        "reference": "single_item_static_eager_decode_same_prefill_contract",
+        "reference": "single_item_static_eager_manual_rotary_decode_same_prefill_contract",
         "validation_steps": int(steps),
         "token_match_all": all(item["token_match"] for item in per_item),
         "mismatch_count": sum(0 if item["token_match"] else 1 for item in per_item),
@@ -377,6 +401,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--validation-steps", type=int, default=8)
     parser.add_argument("--torchair-cache-dir", type=Path, default=DEFAULT_TORCHAIR_CACHE_DIR)
     parser.add_argument("--decode-weight-format", choices=DECODE_WEIGHT_FORMAT_CHOICES, default="none")
+    parser.add_argument("--decode-rotary-impl", choices=DECODE_ROTARY_IMPL_CHOICES, default=DECODE_ROTARY_IMPL_MANUAL)
     parser.add_argument("--hash-model-files", action="store_true")
     parser.add_argument("--output", type=Path, default=None)
     return parser.parse_args()
@@ -418,6 +443,11 @@ def main() -> None:
     maybe_sync_device(model.device)
     decode_weight_format["setup_s"] = float(time.perf_counter() - format_start)
     effective_decode_weight_format = str(decode_weight_format.get("effective_mode", "none"))
+    rotary_start = time.perf_counter()
+    decode_rotary_impl = configure_decode_rotary_impl(model, str(args.decode_rotary_impl))
+    maybe_sync_device(model.device)
+    decode_rotary_impl["setup_s"] = float(time.perf_counter() - rotary_start)
+    effective_decode_rotary_impl = str(decode_rotary_impl.get("effective_mode", DECODE_ROTARY_IMPL_MANUAL))
     processor = AutoProcessor.from_pretrained(
         processor_dir,
         use_fast=bool(args.use_fast),
@@ -436,6 +466,7 @@ def main() -> None:
         batch_size=int(args.batch_size),
         cache_length=int(args.cache_length),
         decode_weight_format=effective_decode_weight_format,
+        decode_rotary_impl=effective_decode_rotary_impl,
     )
     maybe_sync_device(model.device)
     compile_wrapper_s = time.perf_counter() - compile_wrapper_start
@@ -494,6 +525,7 @@ def main() -> None:
         "warmup_steps_after_compile_call": int(remaining_warmup),
         "validation_steps": int(args.validation_steps),
         "decode_weight_format": decode_weight_format,
+        "decode_rotary_impl": decode_rotary_impl,
         "compile": {
             **dict(compile_meta),
             "compile_wrapper_s": float(compile_wrapper_s),

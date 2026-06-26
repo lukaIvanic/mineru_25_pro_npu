@@ -51,6 +51,18 @@ raw_batch_tok_s = (B * N) / decode_s
 Prefill, processor work, cache assembly, compile, and warmup are reported but
 excluded from `raw_batch_tok_s`.
 
+Decode rotary can be selected with `--decode-rotary-impl`:
+
+```text
+manual          original PyTorch rotate_half math
+npu_rotary_mul  NPU-native torch_npu.npu_rotary_mul(..., rotary_mode="half")
+```
+
+The native path is decode-only. Prefill still uses the manual implementation so
+the ready cache contract does not change while we measure the compiled decode
+graph. Validation compares batched compiled decode against single-item static
+eager decode with manual rotary.
+
 ## Correctness Check
 
 The script validates the batched compiled decode against single-item static
@@ -79,6 +91,7 @@ python 04_compiled_batch_decode/bench_compiled_batch_decode.py \
   --warmup-steps 8 \
   --validation-steps 8 \
   --decode-weight-format decode_nz \
+  --decode-rotary-impl manual \
   --torchair-cache-dir outputs/exp04_torchair_cache_decode_nz \
   --hash-model-files \
   --output outputs/exp04_batch1_decode_nz.json
@@ -100,6 +113,7 @@ python 04_compiled_batch_decode/bench_compiled_batch_decode.py \
   --warmup-steps 8 \
   --validation-steps 8 \
   --decode-weight-format decode_nz \
+  --decode-rotary-impl manual \
   --torchair-cache-dir outputs/exp04_torchair_cache_decode_nz \
   --hash-model-files \
   --output outputs/exp04_batch2_decode_nz.json
@@ -117,6 +131,7 @@ python 04_compiled_batch_decode/bench_compiled_batch_decode.py \
   --warmup-steps 8 \
   --validation-steps 8 \
   --decode-weight-format decode_nz \
+  --decode-rotary-impl manual \
   --torchair-cache-dir outputs/exp04_torchair_cache_decode_nz \
   --hash-model-files \
   --output outputs/exp04_batch4_decode_nz.json
@@ -134,19 +149,33 @@ python 04_compiled_batch_decode/bench_compiled_batch_decode.py \
   --warmup-steps 8 \
   --validation-steps 8 \
   --decode-weight-format decode_nz \
+  --decode-rotary-impl manual \
   --torchair-cache-dir outputs/exp04_torchair_cache_decode_nz \
   --hash-model-files \
   --output outputs/exp04_batch8_decode_nz.json
 ```
 
 The first run for each `(batch_size, cache_length, decode_weight_format)` may
-pay a fresh TorchAir compile. A warm rerun should avoid the cold compile.
+pay a fresh TorchAir compile. The cache key also includes `decode_rotary_impl`,
+so manual and `npu_rotary_mul` use separate graphs. A warm rerun should avoid
+the cold compile.
+
+After the manual baseline passes, repeat the same B=1/2/4/8 commands with:
+
+```text
+--decode-rotary-impl npu_rotary_mul
+--torchair-cache-dir outputs/exp04_torchair_cache_decode_nz_rotary_npu
+--output outputs/exp04_batch{B}_decode_nz_rotary_npu.json
+```
+
+Do not compare speed unless both modes pass validation for the same batch size.
 
 Report these fields for every batch size:
 
 ```text
 model_identity
 decode_weight_format
+decode_rotary_impl
 compile
 timing_s
 throughput
@@ -161,6 +190,7 @@ throughput.raw_batch_tok_s
 throughput.decode_calls_per_s
 timing_s.decode_s
 validation.token_match_all
+decode_rotary_impl.effective_mode
 compile.compiled_first_call_s
 compile.torchair_cache_dir
 ```
@@ -184,6 +214,7 @@ python 04_compiled_batch_decode/bench_compiled_batch_decode.py \
   --warmup-steps 2 \
   --validation-steps 4 \
   --decode-weight-format none \
+  --decode-rotary-impl manual \
   --output outputs/exp04_batch2_cuda_smoke.json
 ```
 

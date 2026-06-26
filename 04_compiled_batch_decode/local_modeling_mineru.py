@@ -24,6 +24,9 @@ FRACTAL_NZ = 29
 DECODE_WEIGHT_FORMAT_NONE = "none"
 DECODE_WEIGHT_FORMAT_NZ = "decode_nz"
 DECODE_WEIGHT_FORMAT_CHOICES = (DECODE_WEIGHT_FORMAT_NONE, DECODE_WEIGHT_FORMAT_NZ)
+DECODE_ROTARY_IMPL_MANUAL = "manual"
+DECODE_ROTARY_IMPL_NPU = "npu_rotary_mul"
+DECODE_ROTARY_IMPL_CHOICES = (DECODE_ROTARY_IMPL_MANUAL, DECODE_ROTARY_IMPL_NPU)
 
 
 def _resolve_model_dir(model_dir: str | Path) -> Path:
@@ -72,14 +75,40 @@ def apply_multimodal_rotary_pos_emb(
     mrope_section: list[int],
     unsqueeze_dim: int = 1,
 ) -> tuple[torch.Tensor, torch.Tensor]:
-    mrope_section = [int(value) for value in mrope_section] * 2
-    cos = torch.cat([part[i % 3] for i, part in enumerate(cos.split(mrope_section, dim=-1))], dim=-1)
-    sin = torch.cat([part[i % 3] for i, part in enumerate(sin.split(mrope_section, dim=-1))], dim=-1)
-    cos = cos.unsqueeze(unsqueeze_dim)
-    sin = sin.unsqueeze(unsqueeze_dim)
+    cos, sin = prepare_multimodal_rotary_factors(cos, sin, mrope_section, unsqueeze_dim=unsqueeze_dim)
     q_embed = (q * cos) + (rotate_half(q) * sin)
     k_embed = (k * cos) + (rotate_half(k) * sin)
     return q_embed, k_embed
+
+
+def prepare_multimodal_rotary_factors(
+    cos: torch.Tensor,
+    sin: torch.Tensor,
+    mrope_section: list[int],
+    *,
+    unsqueeze_dim: int = 1,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    mrope_section = [int(value) for value in mrope_section] * 2
+    cos = torch.cat([part[i % 3] for i, part in enumerate(cos.split(mrope_section, dim=-1))], dim=-1)
+    sin = torch.cat([part[i % 3] for i, part in enumerate(sin.split(mrope_section, dim=-1))], dim=-1)
+    return cos.unsqueeze(unsqueeze_dim), sin.unsqueeze(unsqueeze_dim)
+
+
+def apply_multimodal_rotary_pos_emb_npu(
+    q: torch.Tensor,
+    k: torch.Tensor,
+    cos: torch.Tensor,
+    sin: torch.Tensor,
+    mrope_section: list[int],
+    unsqueeze_dim: int = 1,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    cos, sin = prepare_multimodal_rotary_factors(cos, sin, mrope_section, unsqueeze_dim=unsqueeze_dim)
+    import torch_npu
+
+    return (
+        torch_npu.npu_rotary_mul(q.contiguous(), cos.contiguous(), sin.contiguous(), rotary_mode="half"),
+        torch_npu.npu_rotary_mul(k.contiguous(), cos.contiguous(), sin.contiguous(), rotary_mode="half"),
+    )
 
 
 def apply_rotary_pos_emb_vision(
@@ -271,6 +300,35 @@ def configure_decode_weight_format(
     return metadata
 
 
+def configure_decode_rotary_impl(
+    model: "LocalMinerU2_5ForConditionalGeneration",
+    mode: str,
+) -> dict[str, object]:
+    if mode not in DECODE_ROTARY_IMPL_CHOICES:
+        raise ValueError(f"unsupported decode rotary impl {mode!r}; expected {DECODE_ROTARY_IMPL_CHOICES}")
+
+    effective_mode = str(mode)
+    skipped_reason = None
+    if mode == DECODE_ROTARY_IMPL_NPU and model.device.type != "npu":
+        effective_mode = DECODE_ROTARY_IMPL_MANUAL
+        skipped_reason = f"npu_rotary_mul requires NPU tensors, got device={model.device.type}"
+
+    updated_layers = 0
+    for module in model.modules():
+        if isinstance(module, MinerUAttention):
+            module.decode_rotary_impl = effective_mode
+            updated_layers += 1
+    return {
+        "requested_mode": str(mode),
+        "effective_mode": effective_mode,
+        "rotary_mode": "half" if effective_mode == DECODE_ROTARY_IMPL_NPU else None,
+        "scope": "decode_static_only",
+        "prefill_rotary_impl": DECODE_ROTARY_IMPL_MANUAL,
+        "updated_attention_layers": int(updated_layers),
+        "skipped_reason": skipped_reason,
+    }
+
+
 @dataclass
 class LocalMinerUOutput:
     logits: torch.Tensor
@@ -396,6 +454,7 @@ class MinerUAttention(nn.Module):
         self.num_key_value_groups = config.num_attention_heads // config.num_key_value_heads
         self.scaling = self.head_dim**-0.5
         self.mrope_section = list((config.rope_scaling or {}).get("mrope_section", [8, 12, 12]))
+        self.decode_rotary_impl = DECODE_ROTARY_IMPL_MANUAL
         self.q_proj = nn.Linear(config.hidden_size, config.num_attention_heads * self.head_dim, bias=True)
         self.k_proj = nn.Linear(config.hidden_size, config.num_key_value_heads * self.head_dim, bias=True)
         self.v_proj = nn.Linear(config.hidden_size, config.num_key_value_heads * self.head_dim, bias=True)
@@ -422,6 +481,23 @@ class MinerUAttention(nn.Module):
             sin,
             self.mrope_section,
         )
+
+    def apply_decode_rotary(
+        self,
+        query_states: torch.Tensor,
+        key_states: torch.Tensor,
+        position_embeddings: tuple[torch.Tensor, torch.Tensor],
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        cos, sin = position_embeddings
+        if self.decode_rotary_impl == DECODE_ROTARY_IMPL_NPU:
+            return apply_multimodal_rotary_pos_emb_npu(
+                query_states,
+                key_states,
+                cos,
+                sin,
+                self.mrope_section,
+            )
+        return self.apply_rotary(query_states, key_states, position_embeddings)
 
     def attend(
         self,
@@ -478,7 +554,7 @@ class MinerUAttention(nn.Module):
         cache_position: torch.Tensor,
     ) -> torch.Tensor:
         query_states, key_states, value_states = self.project_qkv(hidden_states)
-        query_states, key_states = self.apply_rotary(query_states, key_states, position_embeddings)
+        query_states, key_states = self.apply_decode_rotary(query_states, key_states, position_embeddings)
         update_decode_kv_cache_(
             key_cache,
             value_cache,
